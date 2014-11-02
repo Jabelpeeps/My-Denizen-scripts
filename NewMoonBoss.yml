@@ -213,7 +213,7 @@
     Stage One Minion Age: adult                 # this is configured correctly for baby zombies, 
     Stage One Minion Zombiemod: "-b"            # see notes in Boss config section, for details.
     Stage One Minion Name: RotWalker
-    Stage One Minion Weapon: iron_sword
+    Stage One Minion Weapon: none
     Stage One Minion Health: 30
     Stage One Minion Quantity: 20
     Stage One Minion Strength: 2
@@ -396,8 +396,10 @@
     # list and now it simply iterates through removing each minion by substituting %value% with their NPC ID, e.g.  n@123
     
     - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
-      - foreach '<npc.flag[Stage%value%Minions].as_list>' {   # the %value% on this line is the Boss fight stage, from the foreach on the line above.
-        - if <npc> != %value% remove %value% }                # the %value% on this line is the NPC ID.
+      # the %value% on the next line is the Boss fight stage, from the foreach on the line above.
+      - foreach '<npc.flag[Stage%value%Minions].as_list>' {  
+        # the %value% on this line is the NPC ID.
+        - if <npc> != %value% remove %value% }                
     }
 
     # It then clears the minion list for each battle stage.
@@ -1044,7 +1046,8 @@
             - ^define Zrange <util.random.int[%minZ%].to[%maxZ%]>
             - ^spawn i@arrow 'origin:%Xrange%,%roof%,%Zrange%,<npc.constant[World Name]>' }
           - ^wait '<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
-          - ^if <npc.flag[ActiveSpecialAttackStage]> == "Rain Arrows" run "NewMoonBoss Special Attack - Rain Arrows" id:Boss<npc.id>SpecialAttack }
+          - ^if <npc.flag[ActiveSpecialAttackStage]> == "Rain Arrows" run "NewMoonBoss Special Attack - Rain Arrows" id:Boss<npc.id>SpecialAttack 
+        }
       }
       # whole script ends when the special attack flag on the Boss is changed.
 #------------------------------------------------------------------------------------------------------------------------
@@ -1070,7 +1073,8 @@
           - strike destination:<%lightningplayer%.location>
           - wait '<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
           - define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
-          - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Bolt" run "NewMoonBoss Special Attack - Lightning Bolt" }
+          - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Bolt" run "NewMoonBoss Special Attack - Lightning Bolt" 
+        }
       }
 #------------------------------------------------------------------------------------------------------------------------
 "NewMoonBoss Special Attack - Lightning Storm":
@@ -1096,11 +1100,11 @@
           - repeat 20 {
             - define Xrange <util.random.int[<%cuboid%.min.x.add[+1].as_int>].to[<%cuboid%.max.x.add[-1].as_int>]>
             - define Zrange <util.random.int[<%cuboid%.min.z.add[+1].as_int>].to[<%cuboid%.max.z.add[-1].as_int>]>
-            - define world '<npc.constant[World Name]>'
-            - strike 'destination:%Xrange%,%floor%,%Zrange%,%world%' }
+            - strike 'destination:%Xrange%,%floor%,%Zrange%,<npc.constant[World Name]>' }
           - wait '<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
           - define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
-          - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Storm" run "NewMoonBoss Special Attack - Lightning Storm" }
+          - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Storm" run "NewMoonBoss Special Attack - Lightning Storm" 
+        }
       }
 #-----------------------------------------------------------------------------------------------------------------------
 "NewMoonBoss Special Attack - TNT":
@@ -1151,7 +1155,8 @@
           - define maxX <%cuboid%.max.x.add[-1].as_int>
           - define minZ <%cuboid%.min.z.add[+1].as_int>
           - define maxZ <%cuboid%.max.z.add[-1].as_int>
-          - repeat 25 {        # change the repeat number to change the number of TNT that are spawned per drop.
+          # change the repeat number below to change the number of TNT that are spawned per attack.
+          - repeat 25 {        
             - define Xrange <util.random.int[%minX%].to[%maxX%]>
             - define Zrange <util.random.int[%minZ%].to[%maxZ%]>
             - spawn e@primed_tnt 'origin:%Xrange%,%roof%,%Zrange%,<npc.constant[World Name]>' }
@@ -1200,22 +1205,21 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Firestarter" {
+    - ^if <npc.flag[PreventDoubleAttack]> != null && <npc.flag[ActiveSpecialAttackStage]> == "Firestarter" {
       - wait 5s
-      - define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-      - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == Firestarter run "NewMoonBoss Special Attack - Firestarter" id:Boss<npc.id>SpecialAttack }
+      - if <npc.flag[ActiveSpecialAttackStage]> == Firestarter run "NewMoonBoss Special Attack - Firestarter" id:Boss<npc.id>SpecialAttack }
 
-      else if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == Firestarter {
-      - flag <npc> PreventDoubleAttack "duration:<npc.constant[Stage %BossStage% Boss Special Attack Delay]>"
-      - if %AttackStage% == null || %AttackStage% == Firestarter flag <npc> ActiveSpecialAttackStage:Firestarter
-      - if %NearbyPlayers% != null {
-        - narrate "<red><npc.name> sets the place on fire..." targets:<npc.flag[BossPlayerList].as_list>
-        - define cuboid <npc.flag[cuboid]>
-        - repeat 20 {
-          - modifyblock location:<%cuboid%.get_spawnable_blocks.random> fire }
-        - wait '<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
-        - define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-        - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Firestarter" run "NewMoonBoss Special Attack - Firestarter" id:Boss<npc.id>SpecialAttack }
+      else if <npc.flag[ActiveSpecialAttackStage]> == null || <npc.flag[ActiveSpecialAttackStage]> == Firestarter {
+        - if %NearbyPlayers% != null && %BossStage% != null {
+          - flag <npc> PreventDoubleAttack 'duration:<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
+          - flag <npc> ActiveSpecialAttackStage:Firestarter
+          - narrate "<red><npc.name> sets the place on fire..." targets:<npc.flag[BossPlayerList].as_list>
+          - define cuboid <npc.flag[cuboid]>
+          - repeat 20 {
+            - modifyblock location:<%cuboid%.get_spawnable_blocks.random> fire }
+          - wait '<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
+          - if <npc.flag[ActiveSpecialAttackStage]> == "Firestarter" run "NewMoonBoss Special Attack - Firestarter" id:Boss<npc.id>SpecialAttack 
+        }
       }
       
 #-------------------------------------------------------------------------------#
@@ -1233,6 +1237,7 @@
 
 "NewMoonBoss Special Attack Handler":
   type: world
+  debug: false
   events:
   
     on npc damaged by player:
@@ -1291,7 +1296,7 @@
 
 "NewMoonBoss Drop the Loot":
     type: task
-
+    debug: true
     script:
     - if '<npc.constant[Loot Distribution]>' == player {
       - foreach <npc.flag[BossHitList].as_list> {
@@ -1317,7 +1322,7 @@
       - sign %signlocation% "Loot Chest|for|all warriors|to share"
       - foreach <npc.flag[BossHitList].as_list> {
         - repeat '<npc.constant[Loot Quantity]>' {
-          - give "i@<proc:NewMoonBoss Determine Loot>" to:<in@location[%chestlocation%]> }
+          - give "i@<proc:NewMoonBoss Determine Loot>" to:in@location[%chestlocation%] }
         }
       - flag <npc> LootChestLocationList:->:%chestlocation% }
       
@@ -1333,7 +1338,7 @@
         - modifyblock location:%chestlocation% chest
         - sign %signlocation% "Loot Chest|for|<%value%.name.display>"
         - repeat '<npc.constant[Loot Quantity]>' {
-          - give 'i@<proc:NewMoonBoss Determine Loot>' to:<in@location[%chestlocation%]> }
+          - give 'i@<proc:NewMoonBoss Determine Loot>' to:in@location[%chestlocation%] }
         }
       - flag <npc> PlayersGettingChest:<npc.flag[BossHitList]>        
       }
