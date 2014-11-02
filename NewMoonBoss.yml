@@ -980,24 +980,21 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Arrows" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <npc.flag[ActiveSpecialAttackStage]> == "Arrows" {
       - ^wait 5s
-      - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-      - ^define BossStage <npc.flag[BossStage]>
-      - ^if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Arrows" run "NewMoonBoss Special Attack - Arrows" id:Boss<npc.id>SpecialAttack }
+      - ^if <npc.flag[ActiveSpecialAttackStage]> == "Arrows" run "NewMoonBoss Special Attack - Arrows" id:Boss<npc.id>SpecialAttack }
 
-      else if %AttackStage% == null || %AttackStage% == "Arrows" {
-        - ^if %NearbyPlayers% != null {
+      else if <npc.flag[ActiveSpecialAttackStage]> == null || <npc.flag[ActiveSpecialAttackStage]> == "Arrows" {
+        - ^if %NearbyPlayers% != null && %BossStage% != null {
           - ^flag <npc> ActiveSpecialAttackStage:Arrows
           - ^flag <npc> PreventDoubleAttack "duration:<npc.constant[Stage %BossStage% Boss Special Attack Delay]>"
-          - ^define arrowplayer "<%NearbyPlayers%.random>"
+          - ^define arrowplayer <%NearbyPlayers%.random>
           - ^narrate "<red><npc.name> shoots a <npc.flag[CurrentSpecialAttack]> towards <yellow><%arrowplayer%.name><red>..." targets:<npc.flag[BossPlayerList].as_list>
           - ^shoot arrow origin:<npc> destination:<%arrowplayer%.location> Height:0.1 save:shot
           - ^foreach <entry[shot].shot_entities> {
             - ^flag global ArrowList:->:%value% }
           - ^wait '<npc.constant[Stage %BossStage% Boss Special Attack Delay]>'
-          - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-          - ^if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Arrows" run "NewMoonBoss Special Attack - Arrows" id:Boss<npc.id>SpecialAttack
+          - ^if <npc.flag[ActiveSpecialAttackStage]> == "Arrows" run "NewMoonBoss Special Attack - Arrows" id:Boss<npc.id>SpecialAttack
         }
       }
 
@@ -1024,7 +1021,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <npc.flag[ActiveSpecialAttackStage]> == "Rain Arrows" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <npc.flag[ActiveSpecialAttackStage]> == "Rain Arrows" {
       - ^wait 5s
       - ^if <npc.flag[ActiveSpecialAttackStage]> == "Rain Arrows" run "NewMoonBoss Special Attack - Rain Arrows" id:Boss<npc.id>SpecialAttack 
     }
@@ -1059,7 +1056,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Bolt" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Bolt" {
       - wait 5s
       - define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
       - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Bolt" run "NewMoonBoss Special Attack - Lightning Bolt" id:Boss<npc.id>SpecialAttack }
@@ -1085,7 +1082,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && "<%NearbyPlayers%.size>" >= 1 && %BossStage% != null && %AttackStage% == "Lightning Storm" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && "<%NearbyPlayers%.size>" >= 1 && %BossStage% != null && %AttackStage% == "Lightning Storm" {
       - wait 5s
       - define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
       - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Lightning Storm" run "NewMoonBoss Special Attack - Lightning Storm" id:Boss<npc.id>SpecialAttack }
@@ -1115,7 +1112,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "TNT" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "TNT" {
       - wait 5s
       - define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
       - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "TNT" run "NewMoonBoss Special Attack - TNT" id:Boss<npc.id>SpecialAttack }
@@ -1140,7 +1137,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <npc.flag[ActiveSpecialAttackStage]> == "TNT Drop" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <npc.flag[ActiveSpecialAttackStage]> == "TNT Drop" {
       - wait 5s
       - if <npc.flag[ActiveSpecialAttackStage]> == "TNT Drop" run "NewMoonBoss Special Attack - TNT Drop" id:Boss<npc.id>SpecialAttack }
 
@@ -1173,7 +1170,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Throw" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Throw" {
       - wait 5s
       - define NearbyPlayers <npc.location.find.players.within[%BossRange%]>
       - if <%NearbyPlayers%.size> >= 1 && %BossStage% != null && %AttackStage% == "Throw" run "NewMoonBoss Special Attack - Throw" id:Boss<npc.id>SpecialAttack }
@@ -1205,7 +1202,7 @@
     - ^define BossStage <npc.flag[BossStage]>
     - ^define BossRange '<npc.constant[Boss Awareness Range]>'
     - ^define NearbyPlayers '<npc.location.find.players.within[%BossRange%]>'
-    - ^if <npc.flag[PreventDoubleAttack]> != null && <npc.flag[ActiveSpecialAttackStage]> == "Firestarter" {
+    - ^if !<npc.has_flag[PreventDoubleAttack]> && <npc.flag[ActiveSpecialAttackStage]> == "Firestarter" {
       - wait 5s
       - if <npc.flag[ActiveSpecialAttackStage]> == Firestarter run "NewMoonBoss Special Attack - Firestarter" id:Boss<npc.id>SpecialAttack }
 
@@ -1322,7 +1319,7 @@
       - sign %signlocation% "Loot Chest|for|all warriors|to share"
       - foreach <npc.flag[BossHitList].as_list> {
         - repeat '<npc.constant[Loot Quantity]>' {
-          - give "i@<proc:NewMoonBoss Determine Loot>" to:in@location[%chestlocation%] }
+          - give "i@<proc:NewMoonBoss Determine Loot>" to:<%chestlocation%.inventory> }
         }
       - flag <npc> LootChestLocationList:->:%chestlocation% }
       
@@ -1338,7 +1335,7 @@
         - modifyblock location:%chestlocation% chest
         - sign %signlocation% "Loot Chest|for|<%value%.name.display>"
         - repeat '<npc.constant[Loot Quantity]>' {
-          - give 'i@<proc:NewMoonBoss Determine Loot>' to:in@location[%chestlocation%] }
+          - give 'i@<proc:NewMoonBoss Determine Loot>' to:<%chestlocation%.inventory> }
         }
       - flag <npc> PlayersGettingChest:<npc.flag[BossHitList]>        
       }

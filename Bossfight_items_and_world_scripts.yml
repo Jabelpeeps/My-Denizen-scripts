@@ -415,22 +415,15 @@
       - flag <npc.owner> "bsBatList:<-:<npc>"
       - remove <npc> }
 
-#-------------------------------------------------------------------------------#
-# The section below handles the world events to make all the "cool stuff"
-# possible. It means that every time one of these events occur in the world, it
-# will be evaluated against some criteria to see if the "cool stuff" should
-# happen.
+#-------------------------------------------------------------------------------
+# The section below handles the world events to make all the "cool stuff" possible. It means that every time one of these events occur
+# in the world, it will be evaluated against some criteria to see if the "cool stuff" should happen.
 #
-# For example, every time any entity (<context.entity>) in the world is damaged
-# by an arrow, it checks to see if the person (<context.damager>) that fired the
-# arrow is holding an item with the following two lore descriptions:
+# For example, every time any entity (<context.entity>) in the world is damaged by an arrow, it checks to see if the person (<context.damager>)
+# that fired the arrow is holding an item created by one of the scripts above.
 #
-#   * A legion of tormented souls imprisoned in this bow fills
-#   * A twisted circus owner forged this to
-#
-# If they are and there are no cooldowns in effect, it'll run the relevant
-# (cast or rotate) commands on the entity that got hit.
-#-------------------------------------------------------------------------------#
+# If they are and there are no cooldowns in effect, it'll run the relevant (cast or rotate) commands on the entity that got hit.
+#-------------------------------------------------------------------------------
 
 "Legendary and Epic Item Effects fixed":   # debug switched off for these.
   type: world
@@ -508,8 +501,8 @@
       
 #============================================================================================================================
     on entity damaged by arrow:
-    # this section contains def's and a catch-all to immediately end script if weapon is vanilla, or arrow fired by a mob.
-    - if !<context.damager.is_player> || '<context.damager.item_in_hand.scriptname>' == null queue clear
+    # this section contains def's and a catch-all to immediately end script if weapon is vanilla, or arrow was not fired by a player.
+    - if !<context.damager.is_player> || '<context.damager.item_in_hand.scriptname||null>' == null queue clear
     - define hitter <context.damager>
     - define victim <context.entity>
     
@@ -531,7 +524,7 @@
       
     on entity damaged by player:
     # this section contains def's and a catch-all to immediately end script if weapon is vanilla.
-    - if '<context.damager.item_in_hand.scriptname>' == null queue clear
+    - if '<context.damager.item_in_hand.scriptname||null>' == null queue clear
     - define hitter <context.damager>
     - define victim <context.entity>
     
@@ -619,6 +612,27 @@
         - remove %value% }
       - flag <player> bsBatList:!
       }
+#-----------------------------------------------------------------------------------------------------------------------------------------
+    # This section is relevant if the boss drop uses the "playerchest" method. It controls who can access the contents of the chest. If the player flag 
+    # "LootChestLocation" does not match the location of the chest it uses "determine cancelled" to prevent the inventory window from showing up.
+    on player opens chest:
+    - define chest <context.inventory.location>
+    - if '<global.flag[LootChestList]||null>' contains %chest% && <player.flag[LootChestLocation]||null> != %chest% {
+        - narrate "<red>You cannot access the contents of this chest."
+        - determine cancelled }
+
+    # If the chest location is on the player flag and the global "GlobalLootChestLocation" list it will despawn when it's closed.
+    on player closes chest:
+    - define chest <context.inventory.location>
+    - if <player.flag[LootChestLocation]||null> == %chest% && '<global.flag[LootChestList]||null>' contains %chest% && %chest% != null {
+      - define sign <%chest%.add[l@0,1,0]>
+      - narrate "<red>Chest has been despawned..."
+      - flag <player> LootChestLocation:!
+      - flag global LootChestList:<-:%chest%
+      - modifyblock %chest% air
+      - modifyblock %sign% air }   
+
+#====================================================================================================================================      
       
 "Legendary and Epic Item Effects":  # these still being debugged
   type: world
@@ -629,8 +643,8 @@
     on player right clicks entity with i@Doppelganger:
     - if <context.entity.equipment.helmet.skin> == <player.name> narrate "<red>Entity is already your Doppelganger."
       else if <context.entity.is_mob> || <context.entity.is_player> {
-        - if "<player.flag[Doppelganger Cooldown]>" == null {
-          - if "<context.entity.equipment.helmet>" != null && <context.entity.is_player> {
+        - if '<player.flag[Doppelganger Cooldown]>' == null {
+          - if <context.entity.equipment.helmet> != null && <context.entity.is_player> {
             - give to:<context.entity.inventory> <context.entity.equipment.helmet> }
           - flag <player> "Doppelganger Cooldown" duration:30s
           - head <context.entity> skin:<player> }
@@ -638,23 +652,5 @@
       else if "<player.flag[Doppelganger Cooldown]>" != null narrate "<white><player.flag[Doppelganger Cooldown].expiration.formatted><red> before you can use <white>Doppelganger<red> again."
 
 
-#====================================================================================================================================      
-    # This section is relevant if the boss drop uses the "playerchest" method. It controls who can access the contents of the chest. If the player flag 
-    # "LootChestLocation" does not match the location of the chest it uses "determine cancelled" to prevent the inventory window from showing up.
-    on player opens chest:
-    - define chest <context.inventory.location>
-    - if '<global.flag[LootChestList]>' contains %chest% && <player.flag[LootChestLocation]> != %chest% {
-        - narrate "<red>You cannot access the contents of this chest."
-        - determine cancelled }
 
-    # If the chest location is on the player flag and the global "GlobalLootChestLocation" list it will despawn when it's closed.
-    on player closes chest:
-    - define chest <context.inventory.location>
-    - if <player.flag[LootChestLocation]> == %chest% && '<global.flag[LootChestList]>' contains %chest% && %chest% != null {
-      - define sign <%chest%.add[l@0,1,0]>
-      - narrate "<red>Chest has been despawned..."
-      - flag <player> LootChestLocation:!
-      - flag global LootChestList:<-:%chest%
-      - modifyblock %chest% air
-      - modifyblock %sign% air }
 
