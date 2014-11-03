@@ -298,43 +298,44 @@
    - Legendary Item
 
 "Mobcorn Time":
+# This script is called by an "on event" in a world script further down.
     type: task
     debug: false
     script:
-    - narrate "<white><%1%.entity_type><red> is going to explode in..." targets:<player.location.find.players.within[10]>
+    - narrate "<white><%1%.entity_type><red> is going to explode in..." targets:<player.location.find.players.within[20]>
     - if <%1%.is_spawned> { 
-      - narrate "<red>3...." targets:<player.location.find.players.within[10]>
+      - narrate "<red>3...." targets:<player.location.find.players.within[20]>
       - playsound location:<%1%.location> sound:fuse
       - playeffect location:<%1%.location> effect:fireworks_spark qty:5 }
       else {
         - queue clear 
-        - flag player "Mobcorn Cooldown:!" }
+        - flag player "Mobcorn_Cooldown:!" }
     - wait 1
     - if <%1%.is_spawned> { 
-      - narrate "<red>2...." targets:<player.location.find.players.within[10]>
+      - narrate "<red>2...." targets:<player.location.find.players.within[20]>
       - playeffect location:<%1%.location> effect:fireworks_spark qty:10 }
       else {
         - queue clear 
-        - flag player "Mobcorn Cooldown:!" }
+        - flag player "Mobcorn_Cooldown:!" }
     - wait 1 
     - if <%1%.is_spawned> { 
-      - narrate "<red>1...." targets:<player.location.find.players.within[10]>
+      - narrate "<red>1...." targets:<player.location.find.players.within[20]>
       - playeffect location:<%1%.location> effect:fireworks_spark qty:20 }
       else {
         - queue clear 
-        - flag player "Mobcorn Cooldown:!" }
+        - flag player "Mobcorn_Cooldown:!" }
     - wait 1
     - if <%1%.is_spawned> {
       - explode power:5 location:<%1%.location>
       - if <%1%.is_spawned> remove %1% }
       else {
         - queue clear
-        - flag player "Mobcorn Cooldown:!" }
+        - flag player "Mobcorn_Cooldown:!" }
 
 
 #------------------- Bloodsucker Legendary Item Section -------------------#
 # This item requires its own section because it does a little more than
-# the other items. Below is a script similar to the minion script above
+# the other items. Below is a script similar to the minion script
 # but a lot simpler.
 #
 # The primary points here are:
@@ -403,7 +404,7 @@
       proximity trigger:
         exit:
           script:
-          - ^if "<player[<npc.owner>].flag[bsTarget]>" == <player> || <player.name> == <npc.owner> {
+          - ^if <npc.owner.flag[bsTarget]> == <player> || <player.name> == <npc.owner> {
             - flag <npc.owner> "bsBatList:<-:<npc>"
             - remove <npc> }
 
@@ -411,7 +412,7 @@
     type: task
     debug: false
     script:
-    - if <npc.flag[Exists]> {
+    - if <npc.has_flag[Exists]> {
       - flag <npc.owner> "bsBatList:<-:<npc>"
       - remove <npc> }
 
@@ -435,8 +436,8 @@
     - if !<context.entity.is_mob> {
       - narrate "<red>You can only use Mobcorn on Mobs!"
       - queue clear }
-    - if "<player.flag[Mobcorn Cooldown]>" == null {
-      - flag <player> "Mobcorn Cooldown" duration:10s
+    - if !<player.has_flag[Mobcorn_Cooldown]> {
+      - flag <player> "Mobcorn_Cooldown" duration:10s
       - run "Mobcorn Time" def:<context.entity> 
       - queue clear }
     - narrate "<red>Please wait for Mobcorn to cooldown..."
@@ -464,15 +465,15 @@
     # a 20 block radius. Above or below ground.
     # WARNING: This will allow players to get into protected buildings!!
     on player right clicks with i@PhaseShifter:
-    - if "<player.flag[PhaseShifter Cooldown]>" == null {
-      - flag <player> "PhaseShifter Cooldown" duration:3s
-      - if "<player.flag[PhaseShifter Narrate Cooldown]>" == null {
+    - if !<player.has_flag[PhaseShifter_Cooldown]> {
+      - flag <player> "PhaseShifter_Cooldown" duration:3s
+      - if !<player.has_flag[PhaseShifter_Narrate_Cooldown]> {
         - random {
           - narrate "<white><player.name.display><red> shimmers and disappears..." targets:<player.location.find.players.within[10]>
           - narrate "<white><player.name.display><red> teleports to a nearby location..." targets:<player.location.find.players.within[10]>
           - narrate "<white>With a puff of smoke, <white><player.name.display><red> teleports not too far away.." targets:<player.location.find.players.within[10]> }
         }
-      - flag <player> "PhaseShifter Narrate Cooldown" duration:30s
+      - flag <player> "PhaseShifter_Narrate_Cooldown" duration:20s
       - playsound location:<player.location> sound:enderman_teleport
       - playeffect location:<player.location> effect:large_smoke
       - define location <player.location.simple>
@@ -481,22 +482,23 @@
       - playsound location:<player.location> sound:enderman_teleport
       - playeffect location:<player.location> effect:large_smoke }
     
-    # Foolsgold - not sure of usefulness in jewelcraft.
+    # Foolsgold - modified from original (which displayed blocks) as mining is not enabled in our quest world.
     on player right clicks block with i@FoolsGold:
-    - if "<player.flag[Fools Gold Cooldown]>" == null {
-      - flag player "Fools Gold Cooldown" duration:120s
+    - if !<player.has_flag[Fools_Gold_Cooldown]> {
+      - flag player "Fools_Gold_Cooldown" duration:120s
       - define location <player.location.cursor_on.simple>
       - define cuboid <el@val[<l@%location%.add[l@-1,0,-1]>|<l@%location%.add[l@1,2,1]>].as_cuboid>
-      - showfake diamond_block location:<%cuboid%.get_spawnable_blocks.random> duration:120s
-      - showfake gold_block location:<%cuboid%.get_spawnable_blocks.random> duration:120s
-      - showfake chest location:<%cuboid%.get_spawnable_blocks.random> duration:120s }
-      else narrate "<white><player.flag[Fools Gold Cooldown].expiration.formatted><red> before you can use <white>Fool's Gold<red> again."  
+      - showfake emerald location:<%cuboid%.get_spawnable_blocks.random> duration:120s
+      - showfake emerald location:<%cuboid%.get_spawnable_blocks.random> duration:120s
+      - showfake emerald location:<%cuboid%.get_spawnable_blocks.random> duration:120s }
+      else narrate "<white><player.flag[Fools_Gold_Cooldown].expiration.formatted><red> before you can use <white>Fool's Gold<red> again."  
           
     # Shoot fireballs in the direction of where the cursor is, they have "weight" so it gives a "bullet drop" effect.
-    # WARNING: Can probably damage and set protected zones on fire!!
+    # As configured here, will not damage blocks or set protected zones on fire.
+    # If you wish to enable the above, they are options you can add to the shoot command.
     on player right clicks with i@Meteorite:
-    - if "<player.flag[Meteorite Cooldown]>" == null {
-      - flag <player> "Meteorite Cooldown" duration:3s
+    - if !<player.has_flag[Meteorite_Cooldown]> {
+      - flag <player> "Meteorite_Cooldown" duration:3s
       - shoot e@fireball height:0.05 gravity:0.01 }  
       
 #============================================================================================================================
@@ -510,14 +512,14 @@
     - if '<%hitter%.item_in_hand.scriptname.contains[Bow of Decay]>' {
       - cast wither duration:10 power:1 %victim%
       - playsound location:<%victim%.location> sound:wither_death volume:2 pitch:0.01
-      - if <%victim%.is_player> && "<%victim%.flag[Hit by Bow of Decay]>" == null {
+      - if <%victim%.is_player> && "!<%victim%.has_flag[Hit by Bow of Decay]>" {
         - flag %victim% "Hit by Bow of Decay" duration:120s
         - narrate "<red>You feel your flesh peeling away...strange voices in your head..so much hate.." targets:%victim% }
       - queue clear }
       
     # MerryGoRound
     - if '<%hitter%.item_in_hand.scriptname.contains[MerryGoRound]>' {
-      - if <%victim%.is_player> && "<%victim%.flag[Hit by MerryGoRound]>" == null {
+      - if <%victim%.is_player> && "!<%victim%.has_flag[Hit by MerryGoRound]>" {
         - flag %victim% "Hit by MerryGoRound" duration:10s
         - narrate "<red>The eery twisted music of a deserted, foggy circus makes you turn...round and round..." targets:%victim% }
       - rotate %victim% duration:5s }
@@ -530,8 +532,8 @@
     
     # first up - Hammer of the Gods   
     - if '<%hitter%.item_in_hand.scriptname.contains[Hammer of the Gods]>' {
-      - if <%victim%.is_player> && '<%victim%.flag[Hit by Hammer of the Gods]>' == null {
-        - flag %victim% "Hit by Hammer of the Gods" duration:120s
+      - if <%victim%.is_player> && '!<%victim%.has_flag[Hit by Gods Hammer]>'  {
+        - flag %victim% "Hit by Gods Hammer" duration:120s
         - narrate "<red>The gods curse you... your end is near..." targets:%victim% }
       - strike destination:<%victim%.location> 
       - queue clear }
@@ -544,9 +546,9 @@
       - queue clear }
     
     # now Bloodsucker
-    - if '<%hitter%.item_in_hand.scriptname.contains[Bloodsucker]>' {
+    - if <%hitter%.item_in_hand.scriptname.contains[Bloodsucker]> {
       - define location <%victim%.location.simple>
-      - if "<%hitter%.flag[bsCooldown]>" == null && "<%hitter%.flag[bsBatList].size>" == 0 && %victim% !contains <%hitter%.flag[bsBatList].aslist> {
+      - if !<%hitter%.has_flag[bsCooldown]> && <%hitter%.flag[bsBatList].size> == 0 && %victim% !contains <%hitter%.flag[bsBatList].aslist> {
         - flag %hitter% "bsCooldown" duration:10s
         - flag %hitter% "bsTarget:%victim%"
         - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
@@ -570,7 +572,7 @@
     - if '<%hitter%.item_in_hand.scriptname.contains[PTD]>' determine cancelled
     
     on player right clicks with i@PTD:
-    - if "<player.flag[PTD Locations]>" != null {
+    - if "<player.has_flag[PTD Locations]>" {
       - playsound location:<player.location> sound:enderman_teleport
       - playeffect location:<player.location> effect:large_smoke
       - narrate "<red>Teleporting to Saved Location [<yellow><player.flag[PTD Locations].size><red>]<&co><white> <player.flag[PTD Locations].get[<player.flag[PTD Locations].size>]>"
@@ -582,7 +584,7 @@
       else narrate "<red>You have no coordinates loaded in your PTD..."
 
     on player left clicks block with i@PTD:
-    - if "<player.flag[PTD Locations]>" == null {
+    - if "!<player.has_flag[PTD Locations]>" {
       - flag <player> "PTD Locations:<player.location.cursor_on.add[0,1,0].simple>"
       - narrate "<red>Saved Location [<yellow><player.flag[PTD Locations].size>/3<red>]<&co><white> <player.flag[PTD Locations].get[<player.flag[PTD Locations].size>]>" }
 
@@ -650,7 +652,3 @@
           - head <context.entity> skin:<player> }
       }
       else if "<player.flag[Doppelganger Cooldown]>" != null narrate "<white><player.flag[Doppelganger Cooldown].expiration.formatted><red> before you can use <white>Doppelganger<red> again."
-
-
-
-
