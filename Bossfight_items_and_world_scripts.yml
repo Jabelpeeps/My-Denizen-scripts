@@ -619,20 +619,20 @@
     # "LootChestLocation" does not match the location of the chest it uses "determine cancelled" to prevent the inventory window from showing up.
     on player opens chest:
     - define chest <context.inventory.location>
-    - if '<global.flag[LootChestList]||null>' contains %chest% && <player.flag[LootChestLocation]||null> != %chest% {
+    - if '<global.flag[LootChestList].as_list||null>' contains %chest% && <player.flag[LootChestLocation]||null> != %chest% {
         - narrate "<red>You cannot access the contents of this chest."
         - determine cancelled }
 
     # If the chest location is on the player flag and the global "GlobalLootChestLocation" list it will despawn when it's closed.
     on player closes chest:
     - define chest <context.inventory.location>
-    - if <player.flag[LootChestLocation]||null> == %chest% && '<global.flag[LootChestList]||null>' contains %chest% && %chest% != null {
+    - if <player.flag[LootChestLocation]||null> == %chest% && '<global.flag[LootChestList].as_list||null>' contains %chest% && %chest% != null {
       - define sign <%chest%.add[l@0,1,0]>
       - narrate "<red>Chest has been despawned..."
       - flag <player> LootChestLocation:!
       - flag global LootChestList:<-:%chest%
-      - modifyblock %chest% air
-      - modifyblock %sign% air }   
+      - modifyblock %sign% air 
+      - modifyblock %chest% air }   
 
 #====================================================================================================================================      
       
