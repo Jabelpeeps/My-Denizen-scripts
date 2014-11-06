@@ -1,0 +1,110 @@
+jewel:
+  type: format
+  debug: false
+  format: "<&f>-[<&b>Jewel<&f>]- <&b><text><&f>"
+
+moon_command:
+  type: command
+  debug: false
+  name: moon
+  description: "Command to tell you the moon's phase"
+  usage: "just do '/moon', it will do the rest!"
+  script:
+      - narrate format:jewel '<global.flag[moon_text]>'
+
+moontimes:
+  type: world
+  debug: false
+
+  # short local tasks to simplify scripts below.
+  tell:
+    - narrate format:jewel "%1%"
+  tellall:   
+    - announce format:jewel to_flagged:dadchat "%1%"
+  tellwarriors:
+    - announce format:jewel to_flagged:moon_warriors "%1%"
+
+  events:
+    on server start:
+        - schematic load name:doorclosed
+        - schematic load name:dooropen
+    #on reload scripts:
+    #    - schematic load name:doorclosed
+    #    - schematic load name:dooropen
+    on player enters bed:
+        - random {
+          - run locally tell "def:That's right, a nice cosy bed is the best place to be at night ;-)"
+          - run locally tell "def:Dreaming about adventures is better than having them, right?"
+          - run locally tell "def:Beds are for lovers and the old, what are you doing in one?" }
+        - wait 2
+        - determine cancelled
+        
+    on time 0 in frozen_spring:
+        - run locally tellall "def:It's Midnight! Are you somewhere safe..."
+        - run locally tellwarriors "def:...or out having an exciting adventure?"
+
+    on time 5 in frozen_spring:
+        - run locally tellall "def:It's 5am in Jewelcraft World, dawn is breaking."
+        - run locally tellwarriors "def:Did you survive the night?"
+        - schematic paste name:doorclosed <l@210,112,438,frozen_spring>
+
+    on time 6 in frozen_spring:
+        - define moon '<w@frozen_spring.moon_phase>'
+        - if %moon% == 5 flag global "moon_text:It will be a New Moon tonight, <&l>extra dark!"
+        - if %moon% == 6 flag global "moon_text:The Moon will be a Waxing Crescent tonight."
+        - if %moon% == 7 flag global "moon_text:The Moon will be showing its First Quarter tonight."
+        - if %moon% == 8 flag global "moon_text:The Moon will be a Waxing Gibbous tonight."
+        - if %moon% == 1 flag global "moon_text:It will be a Full Moon tonight, you'd better stay inside!"
+        - if %moon% == 2 flag global "moon_text:The Moon will be a Waning Gibbous tonight."
+        - if %moon% == 3 flag global "moon_text:The Moon will be showing its Last Quarter tonight."
+        - if %moon% == 4 flag global "moon_text:The Moon will be a Waning Crescent tonight."
+
+    on time 12 in frozen_spring:
+        - run locally tellall "def:It's Midday in Jewelcraft World."
+        - run locally tellwarriors "def:Where will you be when night falls?" 
+
+    on time 18 in frozen_spring:
+        - run locally tellall "def:It's 6pm in Jewelcraft World, night is drawing in."
+        - announce format:jewel to_flagged:moon_warriors '<global.flag[moon_text]>'
+
+    on time 19 in frozen_spring:
+        - run locally tellall "def:Darkness has fallen, and monsters are out to 'play'..."
+        - schematic paste name:dooropen <l@210,112,438,frozen_spring>
+        - define moon '<w@frozen_spring.moon_phase>'
+        - if %moon% == 5 run s@phase_task p:new_moon
+        - if %moon% == 6 run s@phase_task p:wax_cres
+        - if %moon% == 7 run s@phase_task p:first_quart
+        - if %moon% == 8 run s@phase_task p:wax_gibb
+        - if %moon% == 1 run s@phase_task p:full_moon
+        - if %moon% == 2 run s@phase_task p:wan_gibb
+        - if %moon% == 3 run s@phase_task p:last_quart
+        - if %moon% == 4 run s@phase_task p:wan_cres
+
+phase_task:
+  type: task
+  debug: false
+  # subscripts from here
+  new_moon:
+  - flag global "moon_text:It's a New Moon tonight, though it looks familiar to some..."
+
+  wax_cres:
+  - flag global "moon_text:The Moon is a Waxing Crescent tonight."
+
+  first_quart:
+  - flag global "moon_text:The Moon is showing its First Quarter tonight."
+
+  wax_gibb:
+  - flag global "moon_text:The Moon is a Waxing Gibbous tonight."
+
+  full_moon:
+  - flag global "moon_text:It's a Full Moon tonight. What's that? You hear howling?"
+
+  wan_gibb:
+  - flag global "moon_text:The Moon is a Waning Gibbous tonight."
+
+  last_quart:
+  - flag global "moon_text:The Moon is showing its Last Quarter tonight."
+
+  wan_cres:
+  - flag global "moon_text:The Moon is a Waning Crescent tonight."
+
