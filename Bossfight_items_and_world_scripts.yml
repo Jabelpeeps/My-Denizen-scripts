@@ -1,17 +1,82 @@
 # Boss Fight - Multistage and Highly Configurable
 # <snip> 
+#======================================================================================================
 # This script is now just the loot items - that only need to be defined once per server, not for each boss (if you have more than one).
-#-------------------------------------------------------------------------------------------------------------------------------
-# This section of the script defines the items, their lore and Minecraft enchantments. To replace/add enchantments check out the following link:
-#
-#   http://jd.bukkit.org/rb/apidocs/org/bukkit/enchantments/Enchantment.html
 # 
 # To get one of these items without fighting the boss, as op, simply substitute the name of the item and type the following into your Minecraft chat:
 #
 #   /ex drop "item:Hammer of the Gods" "location:<player.location>"
 #
-#--------------------------------- Common Items --------------------------------------------------------------------------------
+#================================================================================================
+"Bossfight Determine Loot":
+#-------------------------------------------------------------------------------
+# This section is a PROCEDURE script used to return a SINGLE value back to our main script. In this case, we just want an ITEM SCRIPT name to be returned.
+#
+# The script "rolls" a value between 0 to a 100 for each player. If it rolls between 0 to 40, set the quality to "Common". If its anywhere between
+# 40 to 70, set it to "Uncommon" etc etc.
+#
+# Then, after the quality has been defined, check which section we'll be getting the item from. So, if the %quality% is "Common", it'll go into the
+# corresponding braces and run the first command "random 8", which will then jump to any one of the following 8 lines.
+#
+# If it then lands on "Durable Diamond Helmet", that's the value the procedure script will return to the main boss script and that's the item that will
+# dropped/given to the player.
+#-------------------------------------------------------------------------------
+    type: procedure
+    debug: false
+    script:
+    - define roll <util.random.int[1].to[100]>
+    - if %roll% >= 0 && %roll% < 40 define quality "Common"
+      else if %roll% >= 40 && %roll% < 70 define quality "Uncommon"
+      else if %roll% >= 70 && %roll% < 85 define quality "Rare"
+      else if %roll% >= 85 && %roll% < 95 define quality "Epic"
+      else if %roll% >= 95 define quality "Legendary"
 
+    - if %quality% == Common {
+      - random {
+        - determine "Trusty Diamond Axe"
+        - determine "Trusty Diamond Sword"
+        - determine "Durable Diamond Helmet"
+        - determine "Thorny Diamond Chestplate"
+        - determine "Diamond Sword of Looting" } }
+    #  - determine "Efficient Diamond Pickaxe" # these three commented out, as no mining/building allowed in our quest world
+    #  - determine "Trusty Diamond Hoe"
+    #  - determine "Trusty Diamond Spade"
+
+      else if %quality% == Uncommon {
+        - random {
+          - determine "Herder"
+          - determine "MerryGoRound"
+          - determine "FoolsGold"
+          - determine "PTD" } }
+      #  - determine "Doppelganger"  # commented out, as glitchy with current server version (spigot 1.7.10 + 1.8 protocol hacks)
+
+      else if %quality% == Rare {
+        - random {
+          - determine "Aquamarine"
+          - determine "Karthlan Warrior Axe"
+          - determine "Flamebane"
+          - determine "PhaseShifter" } }
+      
+      else if %quality% == Epic 
+        - random {
+          - determine "Meteorite"
+          - determine "Sunflare"
+          - determine "Heartburn" } }
+      
+      else if %quality% == Legendary 
+        - random {
+          - determine "Bow of Decay"
+          - determine "Hammer of the Gods"
+          - determine "Lifestealer"
+          - determine "Bloodsucker"
+          - determine "Mobcorn" } }
+          
+ #=================================================================================================================================
+  # The next section of the script defines the items, their lore and Minecraft enchantments. To replace/add enchantments check out the following link:
+  #
+  #   http://jd.bukkit.org/rb/apidocs/org/bukkit/enchantments/Enchantment.html
+
+#--------------------------------- Common Items --------------------------------------------------------------------------------
 "Trusty Diamond Axe":
    type: item
    material: diamond_axe
@@ -310,7 +375,7 @@
       else {
         - queue clear 
         - flag player "Mobcorn_Cooldown:!" }
-    - wait 1
+    - wait 1t
     - if <%1%.is_spawned> { 
       - narrate "<red>2...." targets:<player.location.find.players.within[20]>
       - playeffect location:<%1%.location> effect:fireworks_spark qty:10 }
@@ -374,46 +439,35 @@
   debug: false
   actions:
     on assignment:
-    - flag <npc.owner> "bsBatList:->:<npc>"
+    - flag <npc.owner> bsBatList:->:<npc>
     - trigger name:proximity toggle:true radius:15
     - trigger name:damage toggle:true
     - execute as_server "npc sel <npc.id>"
     - execute as_server "npc name"
     - execute as_server "npc vulnerable"
-    - execute as_server "npc health --set 1"
-    - flag <npc> Exists
+    - execute as_server "npc health --set 5"
     - run "Bloodsucker Despawn Timer" delay:60s
     
     on death:
-    - flag <npc.owner> "bsBatList:<-:<npc>"
-    - flag <npc> Exists:!
+    - determine passively cancelled
+    - flag <npc.owner> bsBatList:<-:<npc>
     - remove <npc>
 
-  interact scripts:
-  - 5 Bloodsucker Interaction
-
-"Bloodsucker Interaction":
-  type: interact
-  debug: false
-  steps:
-    1:
-      damage trigger:
-        script:
-        - playsound location:<npc.location> sound:bat_idle
-
-      proximity trigger:
-        exit:
-          script:
-          - ^if <npc.owner.flag[bsTarget]> == <player> || <player.name> == <npc.owner> {
-            - flag <npc.owner> "bsBatList:<-:<npc>"
-            - remove <npc> }
+    on damage:
+    - playsound location:<npc.location> sound:bat_idle
+    
+    on exit proximity:
+    - ^if <npc.owner.flag[bsTarget]> == <player> || <player> == <npc.owner> {
+      - flag <npc.owner> bsBatList:<-:<npc>
+      - remove <npc> }
 
 "Bloodsucker Despawn Timer":
     type: task
     debug: false
     script:
-    - if <npc.has_flag[Exists]> {
-      - flag <npc.owner> "bsBatList:<-:<npc>"
+    - define npc <npc>
+    - if <util.npc_is_valid[%npc%]> {
+      - flag <npc.owner> bsBatList:<-:<npc>
       - remove <npc> }
 
 #-------------------------------------------------------------------------------
@@ -433,18 +487,18 @@
   
     # Mobcorn - script performs checks and then calls task script "mobcorn time"
     on player right clicks entity with i@Mobcorn:
-    - if !<context.entity.is_mob> {
+    - ^if !<context.entity.is_mob> || <global.flag[AllMinions].as_list||li@> contains <context.entity> {
       - narrate "<red>You can only use Mobcorn on Mobs!"
       - queue clear }
-    - if !<player.has_flag[Mobcorn_Cooldown]> {
-      - flag <player> "Mobcorn_Cooldown" duration:10s
+    - ^if !<player.has_flag[Mobcorn_Cooldown]> {
+      - flag <player> "Mobcorn_Cooldown" duration:30s
       - run "Mobcorn Time" def:<context.entity> 
       - queue clear }
-    - narrate "<red>Please wait for Mobcorn to cooldown..."
+    - ^narrate "<white><player.flag[Mobcorn_Cooldown].expiration.formatted><red> before you can use <white>Mobcorn<red> again."  
        
     # Herder - captures mobs, for release later on. NB does not save detail of mob, only type.
     on player right clicks entity with i@Herder:
-    - if <player.flag[HerderList].size> >= 3 narrate "<red>The <white>Herder<red> is full and cannot capture any more souls..."
+    - if <player.flag[HerderList].size||0> >= 3 narrate "<red>The <white>Herder<red> is full and cannot capture any more souls..."
       else if <context.entity.is_mob> {
         - flag <player> HerderList:->:<context.entity.entity_type>
         - playeffect location:<context.entity.location> effect:witch_magic
@@ -453,11 +507,11 @@
           else if <player.flag[HerderList].size> >= 2 narrate "<red>You have trapped the souls of <player.flag[HerderList].formatted>.." }
 
     on player right clicks block with i@Herder:
-    - if <player.flag[HerderList]> != null {
+    - if <player.has_flag[HerderList]> {
       - narrate "<red>Releasing <player.flag[HerderList].formatted>..."
       - define location <location.cursor_on.simple>
-      - define cuboid <el@val[<l@%location%.add[l@-1,0,-1]>|<l@%location%.add[l@1,2,1]>].as_cuboid>
-      - foreach <player.flag[HerderList].aslist> {
+      - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
+      - foreach <player.flag[HerderList].as_list> {
         - spawn %value% location:<%cuboid%.get_spawnable_blocks.random> }
       - flag <player> "HerderList:!" }
       
@@ -485,12 +539,12 @@
     # Foolsgold - modified from original (which displayed blocks) as mining is not enabled in our quest world.
     on player right clicks block with i@FoolsGold:
     - if !<player.has_flag[Fools_Gold_Cooldown]> {
-      - flag player "Fools_Gold_Cooldown" duration:120s
+      - flag player "Fools_Gold_Cooldown" duration:60s
       - define location <player.location.cursor_on.simple>
-      - define cuboid <el@val[<l@%location%.add[l@-1,0,-1]>|<l@%location%.add[l@1,2,1]>].as_cuboid>
-      - showfake emerald location:<%cuboid%.get_spawnable_blocks.random> duration:120s
-      - showfake emerald location:<%cuboid%.get_spawnable_blocks.random> duration:120s
-      - showfake emerald location:<%cuboid%.get_spawnable_blocks.random> duration:120s }
+      - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
+      - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
+      - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
+      - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s }
       else narrate "<white><player.flag[Fools_Gold_Cooldown].expiration.formatted><red> before you can use <white>Fool's Gold<red> again."  
           
     # Shoot fireballs in the direction of where the cursor is, they have "weight" so it gives a "bullet drop" effect.
@@ -548,19 +602,19 @@
     # now Bloodsucker
     - if <%hitter%.item_in_hand.scriptname.contains[Bloodsucker]> {
       - define location <%victim%.location.simple>
-      - if !<%hitter%.has_flag[bsCooldown]> && <%hitter%.flag[bsBatList].size> == 0 && %victim% !contains <%hitter%.flag[bsBatList].aslist> {
+      - if !<%hitter%.has_flag[bsCooldown]> && <%hitter%.flag[bsBatList].size||0> == 0 {
         - flag %hitter% "bsCooldown" duration:10s
         - flag %hitter% "bsTarget:%victim%"
         - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
         - foreach <%cuboid%.get_blocks[air].random[3]> {
           - run instantly "Spawn Bloodsucker Bat" def:%value%|%hitter% }
-        - foreach <%hitter%.flag[bsBatList].aslist> {
+        - foreach <%hitter%.flag[bsBatList].as_list> {
           - attack %value% target:%victim% }
         - queue clear }
         
-      - if <%hitter%.flag[bsBatList].size> >= 1 && %victim% !contains <%hitter%.flag[bsBatList].aslist> {
+      - if <%hitter%.flag[bsBatList].size||0> >= 1 && %victim% !contains <%hitter%.flag[bsBatList].as_list||li@> {
         - flag %hitter% "bsTarget:%victim%"
-        - foreach <%hitter%.flag[bsBatList].aslist> {
+        - foreach <%hitter%.flag[bsBatList].as_list> {
           - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
           - playeffect location:<%cuboid%.get_blocks[air].random> effect:large_smoke
           - define cuboid <el@val[<l@%location%.add[l@-2,-1,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
@@ -602,19 +656,23 @@
     # any bats that were spawned with the Bloodsucker item.
     on player quits:
     - if <player.flag[bsBatList].size> >= 1 {
-      - foreach <player.flag[bsBatList].aslist> {
+      - foreach <player.flag[bsBatList].as_list> {
         - flag <player> bsBatList:<-:%value%
         - remove %value% }
       - flag <player> bsBatList:! }
     
     on player dies:
     - if <player.flag[bsBatList].size> >= 1 {
-      - foreach <player.flag[bsBatList].aslist> {
+      - foreach <player.flag[bsBatList].as_list> {
         - flag <player> bsBatList:<-:%value%
         - remove %value% }
       - flag <player> bsBatList:!
       }
 #-----------------------------------------------------------------------------------------------------------------------------------------
+"Bossfight Utility World Scripts":
+  type: world
+  debug: false
+  events:
     # This section is relevant if the boss drop uses the "playerchest" method. It controls who can access the contents of the chest. If the player flag 
     # "LootChestLocation" does not match the location of the chest it uses "determine cancelled" to prevent the inventory window from showing up.
     on player opens chest:
@@ -634,21 +692,29 @@
       - modifyblock %sign% air 
       - modifyblock %chest% air }   
 
+    # There is a chance the NPC (boss or minions) can hurt themselves, so even though it's not the most effective world script, 
+    # it will at least check to see if the "damager" is the boss or a minion and if so, cancel the damage
+    on npc damages npc:
+    - if <context.entity> == <context.damager> && <global.flag[ListOfBosses].as_list||null> contains <context.entity> determine cancelled
+      else if <context.entity> == <context.damager> && <global.flag[AllMinions].as_list||null> contains <context.entity> determine cancelled
+      else if <context.damager> == <npc.flag[MinionCreator]||null> determine cancelled
+      else if <npc.flag[AllMyMinions].as_list||null> contains <context.damager> determine cancelled
+      
 #====================================================================================================================================      
       
-"Legendary and Epic Item Effects":  # these still being debugged
-  type: world
-  debug: true
-  events:
+# "Legendary and Epic Item Effects":  # these still being debugged
+  # type: world
+  # debug: true
+  # events:
 
-    # Doppelganger - head skins ? broken with 1.7 client. I have a plan to change this one considerably.
-    on player right clicks entity with i@Doppelganger:
-    - if <context.entity.equipment.helmet.skin> == <player.name> narrate "<red>Entity is already your Doppelganger."
-      else if <context.entity.is_mob> || <context.entity.is_player> {
-        - if '<player.flag[Doppelganger Cooldown]>' == null {
-          - if <context.entity.equipment.helmet> != null && <context.entity.is_player> {
-            - give to:<context.entity.inventory> <context.entity.equipment.helmet> }
-          - flag <player> "Doppelganger Cooldown" duration:30s
-          - head <context.entity> skin:<player> }
-      }
-      else if "<player.flag[Doppelganger Cooldown]>" != null narrate "<white><player.flag[Doppelganger Cooldown].expiration.formatted><red> before you can use <white>Doppelganger<red> again."
+    # # Doppelganger - head skins ? broken with 1.7 client. I have a plan to change this one considerably.
+    # on player right clicks entity with i@Doppelganger:
+    # - if <context.entity.equipment.helmet.skin> == <player.name> narrate "<red>Entity is already your Doppelganger."
+      # else if <context.entity.is_mob> || <context.entity.is_player> {
+        # - if '<player.flag[Doppelganger Cooldown]>' == null {
+          # - if <context.entity.equipment.helmet> != null && <context.entity.is_player> {
+            # - give to:<context.entity.inventory> <context.entity.equipment.helmet> }
+          # - flag <player> "Doppelganger Cooldown" duration:30s
+          # - head <context.entity> skin:<player> }
+      # }
+      # else if "<player.flag[Doppelganger Cooldown]>" != null narrate "<white><player.flag[Doppelganger Cooldown].expiration.formatted><red> before you can use <white>Doppelganger<red> again."
