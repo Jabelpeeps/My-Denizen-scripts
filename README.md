@@ -17,5 +17,9 @@ Moontimes.yml
 -------------
 A script of entirely my own creation, using the moonphases tag to (at the moment) provide formatted announcements of the moon's phase to certain groups of players, and time of day announcements to all players.  My ultimate intention is to use this to run a different Boss-fight on each pahse of the moon in our quest world.
 
+Dad.yml
+-------
+A short script with working regex chat triggers, and formatted responses.
+
 
 
