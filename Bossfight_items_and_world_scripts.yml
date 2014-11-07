@@ -413,7 +413,6 @@
 # the player dies or quits the server.
 #------------------- Bloodsucker Legendary Item Section -------------------#
 
-
 "Bloodsucker":
    type: item
    material: diamond_sword
@@ -430,9 +429,9 @@
     debug: false
     script:
     - playeffect location:%1% effect:LARGE_SMOKE
-    - execute as_server "npc create Bloodsucker --at %1% --type bat --speed 1.5"
-    - execute as_server "npc owner %2%"
-    - execute as_server 'npc assign --set "Bloodsucker Bat"'
+    - execute as_server "npc create Bloodsucker --at %1% --type bat --speed 1.5" silent
+    - execute as_server "npc owner %2%" silent
+    - execute as_server 'npc assign --set "Bloodsucker Bat"' silent
 
 "Bloodsucker Bat":
   type: assignment
@@ -442,10 +441,10 @@
     - flag <npc.owner> bsBatList:->:<npc>
     - trigger name:proximity toggle:true radius:15
     - trigger name:damage toggle:true
-    - execute as_server "npc sel <npc.id>"
-    - execute as_server "npc name"
-    - execute as_server "npc vulnerable"
-    - execute as_server "npc health --set 5"
+    - execute as_server "npc sel <npc.id>" silent
+    - execute as_server "npc name" silent
+    - execute as_server "npc vulnerable" silent
+    - execute as_server "npc health --set 5" silent
     - run "Bloodsucker Despawn Timer" delay:60s
     
     on death:
@@ -480,15 +479,18 @@
 # If they are and there are no cooldowns in effect, it'll run the relevant (cast or rotate) commands on the entity that got hit.
 #-------------------------------------------------------------------------------
 
-"Legendary and Epic Item Effects fixed":   # debug switched off for these.
+"Legendary and Epic Item Effects":   
   type: world
   debug: false
   events:
   
     # Mobcorn - script performs checks and then calls task script "mobcorn time"
     on player right clicks entity with i@Mobcorn:
-    - ^if !<context.entity.is_mob> || <global.flag[AllMinions].as_list||li@> contains <context.entity> {
+    - ^if !<context.entity.is_mob> && <global.flag[AllMinions].as_list||li@> !contains <context.entity> {
       - narrate "<red>You can only use Mobcorn on Mobs!"
+      - queue clear }
+    - ^if <global.flag[ListOfBosses].as_list||li@> contains <context.entity> {
+      - narrate "<red>You can't use Mobcorn on Bosses!"
       - queue clear }
     - ^if !<player.has_flag[Mobcorn_Cooldown]> {
       - flag <player> "Mobcorn_Cooldown" duration:30s
@@ -685,11 +687,10 @@
     on player closes chest:
     - define chest <context.inventory.location>
     - if <player.flag[LootChestLocation]||null> == %chest% && '<global.flag[LootChestList].as_list||null>' contains %chest% && %chest% != null {
-      - define sign <%chest%.add[l@0,1,0]>
-      - narrate "<red>Chest has been despawned..."
+      - narrate "<red>Chest has been removed..."
       - flag <player> LootChestLocation:!
       - flag global LootChestList:<-:%chest%
-      - modifyblock %sign% air 
+      - modifyblock <%chest%.add[l@0,1,0]> air 
       - modifyblock %chest% air }   
 
     # There is a chance the NPC (boss or minions) can hurt themselves, so even though it's not the most effective world script, 
@@ -700,6 +701,47 @@
       else if <context.damager> == <npc.flag[MinionCreator]||null> determine cancelled
       else if <npc.flag[AllMyMinions].as_list||null> contains <context.damager> determine cancelled
       
+#====================================================================================================================
+"Health Status Bar":
+
+# The following script builds up a health bar for the NPC. It does this by dividing their current health by 10, the result of that, say 7.2 is
+# then rounded down to 7. It then repeats a loop 7 times, each time adding 10 "|" characters into a flag. So 7 x ||||||||||.. the remaining 2 (7.2)
+# then just gets added onto that, e.g. ||
+#
+# The reason I did it this way was so that it didn't repeat the loop 70 times to build up the number of health bars.
+#
+# In the example, 72 bars will be <GREEN> and the remaining 28 bars will be <RED>.
+#
+# This can be used with any NPC regardless of how much health they have because it uses their "percentage" of health rather than max value health.
+
+  type: task
+  debug: false
+  script:
+  - ^if <npc.health.percentage> == 100 narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||<white>]"
+    
+    else {
+      - ^define GreenTenCount <el@val[<m:floor(<npc.health.percentage>/10)>].asint>
+      - ^define GreenTenTotal <el@val[<m:%GreenTenCount%*10>].asint>
+      - ^define GreenOneCount <el@val[<m:<npc.health.percentage>-%GreenTenTotal%>].asint>
+
+      - ^define RedTenCount <el@val[<m:floor(<m:100-<npc.health.percentage>>/10)>].asint>
+      - ^define RedTenTotal <el@val[<m:%RedTenCount%*10>].asint>
+      - ^define RedOneCount <el@val[<m:<m:100-<npc.health.percentage>>-%RedTenTotal%>].asint>
+
+      - ^repeat %GreenTenCount% {
+        - flag <npc> "GreenBars:<npc.flag[GreenBars]|||>||||||||||" }
+      - ^repeat %GreenOneCount% {
+        - flag <npc> "GreenBars:<npc.flag[GreenBars]|||>|" }
+      - ^repeat %RedTenCount% {
+        - flag <npc> "RedBars:<npc.flag[RedBars]|||>||||||||||" }
+      - ^repeat %RedOneCount% {
+        - flag <npc> "RedBars:<npc.flag[RedBars]|||>|" }
+      - ^if !<npc.has_flag[RedBars]> narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green><npc.flag[GreenBars]><white>]"
+        else narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green><npc.flag[GreenBars]><red><npc.flag[RedBars].replace[null]><white>]"
+      - ^flag npc GreenBars:!
+      - ^flag npc RedBars:!
+    }
+     
 #====================================================================================================================================      
       
 # "Legendary and Epic Item Effects":  # these still being debugged
