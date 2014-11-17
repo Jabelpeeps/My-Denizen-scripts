@@ -1,13 +1,13 @@
 # Boss Fight - Multistage and Highly Configurable
-# <snip> 
-#======================================================================================================
-# This script is now just the loot items - that only need to be defined once per server, not for each boss (if you have more than one).
-# 
-# To get one of these items without fighting the boss, as op, simply substitute the name of the item and type the following into your Minecraft chat:
-#
-#   /ex drop "item:Hammer of the Gods" "location:<player.location>"
-#
-#================================================================================================
+ # <snip> 
+ #======================================================================================================
+ # This script is now just the loot items - that only need to be defined once per server, not for each boss (if you have more than one).
+ # 
+ # To get one of these items without fighting the boss, as op, simply substitute the name of the item and type the following into your Minecraft chat:
+ #
+ #   /ex drop "item:Hammer of the Gods" "location:<player.location>"
+ #
+ #================================================================================================
 "Bossfight Determine Loot":
 #-------------------------------------------------------------------------------
 # This section is a PROCEDURE script used to return a SINGLE value back to our main script. In this case, we just want an ITEM SCRIPT name to be returned.
@@ -171,7 +171,6 @@
    - dig_speed:5
 
 #-------------------------------- Uncommon Items -------------------------------#
-
 "MerryGoRound":
    type: item
    material: bow
@@ -231,7 +230,6 @@
    - Uncommon Item
 
 #--------------------------------- Rare Items --------------------------------#
-
 "Flamebane":
    type: item
    material: diamond_chestplate
@@ -276,7 +274,6 @@
    - durability:3
 
 #--------------------------------- Epic Items --------------------------------#
-
 "Meteorite":
    type: item
    material: stick
@@ -317,7 +314,6 @@
    - durability:3
 
 #----------------------------- Legendary Items -----------------------------#
-
 "Bow of Decay":
    type: item
    material: bow
@@ -398,20 +394,20 @@
         - flag player "Mobcorn_Cooldown:!" }
 
 
-#------------------- Bloodsucker Legendary Item Section -------------------#
-# This item requires its own section because it does a little more than
-# the other items. Below is a script similar to the minion script
-# but a lot simpler.
-#
-# The primary points here are:
-# 1) Create the bats
-# 2) Add bats to player flag and remove them permanently on death
-# 3) Remove bats if their owner or their target exits their proximity.
-# 4) Remove the bat after 60 seconds regardless of what it's doing.
-#
-# Further down there are a couple of world events to remove the bats when
-# the player dies or quits the server.
-#------------------- Bloodsucker Legendary Item Section -------------------#
+ #------------------- Bloodsucker Legendary Item Section -------------------#
+  # This item requires its own section because it does a little more than
+  # the other items. Below is a script similar to the minion script
+  # but a lot simpler.
+  #
+  # The primary points here are:
+  # 1) Create the bats
+  # 2) Add bats to player flag and remove them permanently on death
+  # 3) Remove bats if their owner or their target exits their proximity.
+  # 4) Remove the bat after 60 seconds regardless of what it's doing.
+  #
+  # Further down there are a couple of world events to remove the bats when
+  # the player dies or quits the server.
+  #------------------- Bloodsucker Legendary Item Section -------------------#
 
 "Bloodsucker":
    type: item
@@ -464,7 +460,7 @@
     type: task
     debug: false
     script:
-    - define npc <npc>
+    - define npc <npc||null>
     - if <util.npc_is_valid[%npc%]> {
       - flag <npc.owner> bsBatList:<-:<npc>
       - remove <npc> }
@@ -478,7 +474,6 @@
 #
 # If they are and there are no cooldowns in effect, it'll run the relevant (cast or rotate) commands on the entity that got hit.
 #-------------------------------------------------------------------------------
-
 "Legendary and Epic Item Effects":   
   type: world
   debug: false
@@ -517,8 +512,7 @@
         - spawn %value% location:<%cuboid%.get_spawnable_blocks.random> }
       - flag <player> "HerderList:!" }
       
-    # This script will teleport any player, where no cooldown is in effect, to a "safe" location within
-    # a 20 block radius. Above or below ground.
+    # This script will teleport any player, where no cooldown is in effect, to a "safe" location within a 20 block radius. Above or below ground.
     # WARNING: This will allow players to get into protected buildings!!
     on player right clicks with i@PhaseShifter:
     - if !<player.has_flag[PhaseShifter_Cooldown]> {
@@ -557,7 +551,7 @@
       - flag <player> "Meteorite_Cooldown" duration:3s
       - shoot e@fireball height:0.05 gravity:0.01 }  
       
-#============================================================================================================================
+ #============================================================================================================================
     on entity damaged by arrow:
     # this section contains def's and a catch-all to immediately end script if weapon is vanilla, or arrow was not fired by a player.
     - if !<context.damager.is_player> || '<context.damager.item_in_hand.scriptname||null>' == null queue clear
@@ -614,7 +608,7 @@
           - attack %value% target:%victim% }
         - queue clear }
         
-      - if <%hitter%.flag[bsBatList].size||0> >= 1 && %victim% !contains <%hitter%.flag[bsBatList].as_list||li@> {
+      - if <%hitter%.flag[bsBatList].size||0> >= 1 && <%hitter%.flag[bsBatList].as_list||li@> !contains %victim% {
         - flag %hitter% "bsTarget:%victim%"
         - foreach <%hitter%.flag[bsBatList].as_list> {
           - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
@@ -670,7 +664,7 @@
         - remove %value% }
       - flag <player> bsBatList:!
       }
-#-----------------------------------------------------------------------------------------------------------------------------------------
+#=====================================================================================================================================
 "Bossfight Utility World Scripts":
   type: world
   debug: false
@@ -691,8 +685,15 @@
       - flag <player> LootChestLocation:!
       - flag global LootChestList:<-:%chest%
       - modifyblock <%chest%.add[l@0,1,0]> air 
-      - modifyblock %chest% air }   
-
+      - modifyblock %chest% air }
+  #---------------------------------------------------------------------------------------------------------------------------
+    # The next event is to show the "blood" effect when you hit a Boss. It uses the the "drip_lava" effect but draws 300 of 
+    # them to make it look like a bloody mist. Thanks to blankiito for this effect!  
+    on npc damaged by player:
+    # the line below originally contained the extra conditional of '&& !<context.entity.has_flag[NoBlood]>' but this flag isn't used or set anywhere.
+    - if <global.flag[ListOfBosses].as_list||li@> contains <context.entity> {
+      - playeffect location:<context.entity.location> effect:DRIP_LAVA radius:10 qty:200 offset:0.15 }   
+  #-------------------------------------------------------------------------------------------------------------------------------
     # There is a chance the NPC (boss or minions) can hurt themselves, so even though it's not the most effective world script, 
     # it will at least check to see if the "damager" is the boss or a minion and if so, cancel the damage
     on npc damages npc:
@@ -717,6 +718,7 @@
   type: task
   debug: false
   script:
+  - ^if <npc.health.percentage||0> == 0 queue clear
   - ^if <npc.health.percentage> == 100 narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green>||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||<white>]"
     
     else {
@@ -737,7 +739,7 @@
       - ^repeat %RedOneCount% {
         - flag <npc> "RedBars:<npc.flag[RedBars]|||>|" }
       - ^if !<npc.has_flag[RedBars]> narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green><npc.flag[GreenBars]><white>]"
-        else narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green><npc.flag[GreenBars]><red><npc.flag[RedBars].replace[null]><white>]"
+        else narrate "<red><npc.name.substring[1,12]> Health<&co><white> [<green><npc.flag[GreenBars]><red><npc.flag[RedBars]><white>]"
       - ^flag npc GreenBars:!
       - ^flag npc RedBars:!
     }

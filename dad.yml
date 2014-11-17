@@ -1,22 +1,54 @@
-
 dadform:
   type: format
   debug: false
   format: "<&4>-[<&2>Dad<&4>]- <&f><text>" 
-
+  
 dadsay:
   type: task
   debug: false
   script:
   - ^narrate format:dadform targets:<npc.location.find.players.within[4]> "%1%" 
-  
+
 Dad:
   Type: assignment
-  debug: false
-  Actions:
+  debug: false  
+  actions:
     on assignment:
     - trigger name:proximity toggle:true radius:3
-    - trigger name:chat toogle:true radius:3
+    - trigger name:chat toggle:true radius:3
+    
+    on enter proximity:
+    # the first line adds a flag to each player, so that Jewel's announcements don't spam the console.
+    - if !<player.has_flag[dadchat]> flag <player> dadchat
+    - engage
+    - run dadsay "def:Hello, <player.name.display>."
+    - random {
+      - run dadsay "def:Did you sleep well? It's about time you woke up!"
+      - run dadsay "def:Good to see you up and about at last!"
+      - run dadsay "def:How did you sleep? I hope you are well rested." }
+    - wait 1s
+    - run dadsay "def:<&7>I have several questions I can answer."
+    - wait 10t
+    - run dadsay "def:<&7>Try saying 'quests','castle','global'or'build'."
+    - wait 10t
+    - run dadsay "def:I only hear you when you talk to me in server chat."
+    - wait 10t
+    - run dadsay "def:do '/ch s' to default to server chat or..."
+    - wait 10t
+    - run dadsay "def:'/s <&lt>message<&gt>' to say one line in server chat."
+    - disengage
+    
+    on exit proximity:
+    - if !<player.has_finished[FidoGives]> {
+      - narrate format:dadform "Oh Yes! I almost forgot!"
+      - ^wait 1
+      - ^narrate format:dadform "Go see Norman in the village! He says its very urgent!"
+      - queue clear }
+    - random {
+      - narrate format:dadform "Have fun out there, but be careful!"
+      - narrate format:dadform "Be sure to be back by nightfall." 
+      - narrate format:dadform "If you see your mother say 'Hi!' from me." }
+
   Interact scripts:
     - 10 DadChat
 
@@ -53,7 +85,7 @@ DadChat:
           - ^wait 1
           - ^run dadsay "def:If this village bores you, you can explore the others."
         4:
-          trigger: /regex:((?i)\bglobal.?)\+REPLACE:How do I chat in <&l>global<&r> channel again?/
+          trigger: /regex:((?i)\bglobal.?)\+REPLACE:How do I chat in the <&l>global<&r> channel again?/
           script:
           - ^run dadsay "def:Prefix your chat with <&o>'/g'<&r> to speak in the global chat"
           - ^wait 1
@@ -61,31 +93,3 @@ DadChat:
           - ^wait 1
           - ^run dadsay "def:Remember to do <&o>'/ch s'<&r> or <&o>'/s'<&r> to talk to npc's"
           
-      Proximity trigger:
-        Entry:
-          script:
-          - engage
-          # the next line adds a flag to each player, so that Jewel's announcements don't spam the console.
-          - if !<player.has_flag[dadchat]> flag <player> dadchat
-          - run dadsay "def:Hello, <player.name.display>."
-          - ^random {
-            - run dadsay "def:Did you sleep well? It's about time you woke up!"
-            - run dadsay "def:Good to see you up and about at last!"
-            - run dadsay "def:How did you sleep? I hope you are well rested." }
-          - wait 1
-          - ^run dadsay "def:<&7>If you want to ask me any questions."
-          - ^run dadsay "def:<&7>I will tell you what I know."
-          - ^run dadsay "def:Talk to me in server chat. <&o>(do '/ch s')<&r>"
-          - disengage
-
-        Exit:
-          script:
-          - if !<player.has_finished[FidoGives]> {
-            - narrate format:dadform "Oh Yes! I almost forgot!"
-            - ^wait 1
-            - ^narrate format:dadform "Go see Norman in the village! He says its very urgent!"
-            - queue clear }
-          - random {
-            - narrate format:dadform "Have fun out there, but be careful!"
-            - narrate format:dadform "Be sure to be back by nightfall." 
-            - narrate format:dadform "If you see your mother say 'Hi!' from me." }
