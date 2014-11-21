@@ -1,0 +1,184 @@
+#
+# This script is a repeatable kill quest, with formatted NPC responses, and random chat phrases for added 'ambience'.
+#
+# To assign this script to an NPC just select the NPC in-game and do '/npc assign --set IrisEndermanQuest'
+# 
+# All sub_scripts and flags used in the script contain the NPC's name, "Iris", so to make another similar NPC:-
+#      1) copy and rename this file
+#      2) Do a 'search and replace' on 'Iris' to replace it with the name of your new NPC.
+#      3) adjust chat format, chat phrases & listener targets to your preferred values.
+#
+Iris:
+  type: format
+  debug: false
+  format: "<&5>-[<&d>Iris<&5>]- <white><text>" 
+
+IrisEndermanQuest:
+  Type: Assignment
+  debug: false
+  actions:
+    on assignment:
+    - trigger name:proximity state:true radius:5
+    - trigger name:chat state:true radius:5
+    
+    on enter proximity:
+    # initial greeting with variations depending on whether player has met npc before.
+    - if '!<player.has_flag[Iris Enderman Quest]>' {
+      - engage 3s
+      - narrate format:Iris "<&d>Iris<white> is my name, and killing <&5>Endermen <white> is my game!"
+      - wait 1
+      - narrate format:Iris "What did you say your name was? <&d><&o><player.name.display.replace[~]><white>?"
+      - wait 1
+      - narrate format:Iris "Want to make some easy money?"
+      - wait 10t
+      - flag player 'Iris Enderman Quest:Quest not accepted'
+      - if <player.flag[QuestList].as_list||li@> !contain 'Iris Enderman Quest' flag player 'QuestList:->:Iris Enderman Quest'
+      - disengage 
+      }
+      # if listener is complete, give reward and set flag with timed expiry to allow players to repeat the quest when it clears.
+      else if '<player.flag[Iris Enderman Quest]>' == 'Complete - return to Iris for reward' {
+        - narrate format:Iris "Hiya <&d><player.name.display.replace[~]><white>! How you doing?"
+        - wait 1
+        - random {
+          - narrate format:Iris "The <&5>purple<white> dust on you shows you found Endermen."
+          - narrate format:Iris "Your burnt eyebrows tells me it was a close fight!"
+          - narrate format:Iris "I smell ender plasma, someone's been busy..."
+          - narrate format:Iris "I'm sure the battle rocked! (and rolled!)" }
+        - wait 1
+        - narrate format:Iris "As promised, here is your reward... <&d> 50 Emeralds!"
+        - wait 10t
+        - narrate format:Iris "Come back tomorrow if you want another go"
+        - give emerald qty:50
+        - flag player 'Iris Enderman Quest:Completed' 
+        - flag player 'Iris Enderman Quest Cooldown' duration:23h
+        - queue clear }
+      else {
+        - narrate format:Iris "Hey <&d><player.name.display.replace[~]><white>, killed many <&5>Endermen <white> lately?"
+        - wait 1
+        - random {
+          - narrate format:Iris "How <&o>do you<&r> catch a creature that teleports?"
+          - narrate format:Iris "I really hate them, they're just <&o>too<&r> thin..."
+          - narrate format:Iris "What's up with them getting hurt by raindrops?"
+          - narrate format:Iris "Who knows what that purple glowing stuff is?"
+          - narrate format:Iris "They may call themselves 'men', but lol!" }
+        - wait 10t
+        }
+      - narrate "<blue>---------> <gray>Talk to <&d>Iris<gray> in server chat."
+      
+    on click:
+    - engage 30t
+    - narrate format:Iris "Hey! I'm not for touching! Let's just talk, ok?"
+    - wait 10t
+    - narrate "<blue>---------> <gray>To use server chat (do '<&5>/ch s<gray>' or '<&5>/s <&lt>message<&gt><gray>')"
+    - disengage
+       
+    on chat:
+    # the commands here stop the chat appearing the usual format, and displays it in a way that mimics the pm formatting.
+    - determine passively cancelled
+    - narrate "<gray>[ <yellow>You<gray> -> <yellow>Iris<gray> ] '<white><context.message><gray>'"
+    - wait 20t
+    
+    # during cooldown period, give time remaining + some chat, before ending the script.
+    - if '<player.has_flag[Iris Enderman Quest Cooldown]>' {
+      - narrate format:Iris "<&d><player.name.display.replace[~]><white>, thanks for killing those <&5>Endermen <white>."
+      - wait 10t
+      - narrate format:Iris "I'll be able to offer you another reward in <&d>'<player.flag[Iris Enderman Quest Cooldown].expiration.formatted>'"
+      - queue clear }
+      
+    # The remaining sections all check the status of quest flag, and present info +/- options depending on progress through the quest.
+    # Firstly, a section to run if the flag is empty (not set).
+    - if '<player.flag[Iris Enderman Quest]||Quest not accepted>' == 'Quest not accepted' {
+      - flag player 'Iris Enderman Quest:Awaiting response...'
+      - random {
+        - narrate format:Iris "We've noticed <&5>Endermen <&d>popping up<white> all over the place!"
+        - narrate format:Iris "That noise, that <&5>Endermen<white> make really bugs me!"
+        - narrate format:Iris "I have too many <green>emeralds<white>, and want to give you some."
+        - narrate format:Iris "I need a fearless hunter for a task." }
+      - wait 1
+      - inject locally StateQuest }
+      
+    # Next a section to play when a player returns having already complete the quest. (and the cooldown has expired.)
+    - if '<player.flag[Iris Enderman Quest]>' == 'Completed' {
+      - flag player 'Iris Enderman Quest:Awaiting response...'
+      - narrate format:Iris "Are you ready to slay some more <&5>Endermen<white>?"
+      - wait 10t
+      - narrate "<blue>---------> <gray>Reply in chat with:- '<&5>Yes<gray>' or '<&5>No<gray>'"
+      - queue clear }
+      
+    # The next section is active after the section above has finished, and will respond in various ways depending on the player's chat.  
+    # It starts by checking that the quest flag is set correctly. (i.e. has the value it was flagged in the previous section.)
+    - if '<player.flag[Iris Enderman Quest]>' == 'Awaiting response...' {
+      # If player says "Yes", set flag and start listener.
+      - if '<context.message.matches[.*((?i)(yes|yus|ya|yup|sure|np)).*]>' {
+        - flag player 'Iris Enderman Quest:Quest in Progress'
+        - wait 1
+        - narrate format:Iris "Great! Come back to me for your <&d>reward<white> when you have"
+        - wait 10t
+        - narrate format:Iris "killed <&d>5<white> of those vile <&5>teleporting<white> vermin!"
+        - listen kill 'ID:IrisKill5Endermen ' 'SCRIPT:IrisListenerComplete' 'type:entity' 'target:enderman' 'qty:5' }
+        
+        # If player says "No", clear Quest flag and delivery a random taunt.
+        else if '<context.message.matches[.*((?i)(no+|nope|na|yikes)).*]>' {
+          - flag player 'Iris Enderman Quest:Quest not accepted'
+          - wait 1
+          - inject locally RandomTaunt }
+        
+        # The next lines repeat the prompts, or the full quest question, if the answer does not trigger the "Yes" or "No" sections.
+        else if '<context.message.matches[.*((?i)(repeat|pardon|what|again)).*]>' inject locally StateQuest
+        else {
+          - narrate "<blue>---------> <gray>Reply with:- '<&5>Yes<gray>' or '<&5>No<gray>'"
+          - wait 10t
+          - narrate "<blue>---------> <gray>or '<&5>Repeat<gray>' (to be reminded of the question)" }
+      - queue clear }
+    
+    # if listener is active, say random encouragement text.
+    - if '<player.flag[Iris Enderman Quest]>' == 'Quest in Progress' {
+      - narrate format:Iris "You haven't killed enough <&5>Endermen <white> yet, come"
+      - wait 10t
+      - narrate format:Iris "back for your reward when you have killed <&d>5<white>."
+      - queue clear }
+    
+    on exit proximity:
+    # the first section removes the 'Awaiting response...' state of the quest flag if the player walks away at that stage, and then taunts them a bit...
+    - if '<player.flag[Iris Enderman Quest]>' == 'Awaiting response...' {
+      - flag player 'Iris Enderman Quest:Quest not accepted'
+      - narrate format:Iris "Heading off? I take it that means <&5>'No'"
+      - wait 1
+      - inject locally RandomTaunt }
+    
+    # This section narrates a random farewell message to players who are at other stages of the quest.
+    - wait 1
+    - random {
+      - narrate format:Iris "<&o>Remember, there are many ways to kill Endermen !"
+      - narrate format:Iris "<&o>Do you like the smell of Endermen in the morning?"
+      - narrate format:Iris "<&o>Have you tried killing Endermen in a boat?"
+      - narrate format:Iris "<&o>There are lots of things to hate about Endermen ."
+      - narrate format:Iris "<&o>If you see your Mum, say 'Hi' from me!" }
+  
+  # a couple of short 'local' scripts that avoid having to repeat these lines in several other places.
+  StateQuest:  
+  - narrate format:Iris "If you kill <&5>5 Endermen<white>, I'll give you a reward!"
+  - wait 10t
+  - narrate format:Iris "Will you accept this quest <&d><player.name.display.replace[~]><white>?"
+  - wait 10t
+  - narrate "<blue>---------> <gray>Reply in chat with:- '<&5>Yes<gray>' or '<&5>No<gray>'"
+  - queue clear 
+  
+  RandomTaunt:
+  - random {
+    - narrate format:Iris "Do you need to get your sword sharpened?"
+    - narrate format:Iris "Is the string on your bow a bit loose?"
+    - narrate format:Iris "Having your armour polished, are you?"
+    - narrate format:Iris "You're not scared of Endermen are you?"
+    - narrate format:Iris "Come back when you're feeling brave enough." }  
+  - queue clear 
+  
+IrisListenerComplete:
+  Type: Task
+  debug: false
+  Script:
+  - narrate "<&5>-[<&d>Quest<&5>]-<white> Well done! You have killed <&5>5 Endermen<white>!" 
+  - wait 10t
+  - narrate "<&5>-[<&d>Quest<&5>]-<white> Return to <&d>Iris<white> for your reward!"
+  - flag player 'Iris Enderman Quest:Complete - return to Iris for reward'
+

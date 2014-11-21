@@ -1,0 +1,73 @@
+spawn_command:
+  type: command
+  debug: false
+  name: spawn
+  description: "Returns you to your last checkpoint. (or, if none found, the first village spawn point)" 
+  usage: "just do /spawn, no args needed."
+  script:
+  - if <player.has_flag[respawnpoint]> teleport <player> <player.flag[respawnpoint]>
+    else teleport <player> 'l@88,141,-337,frozen_spring'
+
+Quests_command:
+  type: command
+  debug: false
+  name: quests
+  description: "Lists the quests you have discovered, and your status in each."
+  usage: "just do /quests, no args needed."
+  script:
+  - if !<player.has_flag[QuestList]||false> {
+    - narrate "You have not discovered any list-able quests yet."
+    - queue clear }
+  - narrate "<&4>----------------------------------------------------"
+  - narrate "<&5>So far, you have discovered the following quests..."
+  - wait 5t
+  - narrate "<&4>----------------------------------------------------"
+  # this foreach will produce a line of the quest display on each loop.
+  - foreach <player.flag[QuestList].as_list> {
+    # save the value for re-use at the end of the script (the foreach in the middle will change %value%)
+    - define QuestName %value%
+    # these lines handle the progress of the quests, adding text to %expiry% when appropriate.
+    - if '<player.has_flag[%QuestName% Cooldown]>' {
+      - define expiry '<&c>- Repeatable in - <&e><player.flag[%QuestName% Cooldown].expiration.formatted|||>' }
+      else if 'Awaiting response...|Quest in Progress' contains <player.flag[%QuestName%]> define expiry ' '
+      else define expiry '<&a>- Available Now'
+    # these lines attempt to put the second line of text into a column, by adding spaces to the end of the questname, however this is
+    # further complicated by 'short' characters, such as 'i', even the space character - which is used for the padding - is 4/5 width.
+    - define CharList <def[QuestName].to_list>
+    - define PadLength <def[QuestName].length.sub[20].abs> 
+    - foreach %CharList% {
+      - if '!<def[value].contains_any_case_sensitive[l|t|i|I| ]>' foreach next
+      - if '<def[value].contains_any_case_sensitive[I|t| ]>' define PadLength <def[PadLength].add[0.4]>
+        else if <def[value].contains_case_sensitive[i]> define PadLength <def[PadLength].add[0.8]>
+        else if <def[value].contains_case_sensitive[l]> define PadLength <def[PadLength].add[0.6]> }
+    - define PadLength <def[PadLength].mul[1.6].add[20]>
+    # this line takes the final definitions, and narrates them in a nice colourful format.
+    - narrate "<&2><def[QuestName].pad_right[<def[PadLength].as_int>]><&e> - <player.flag[%QuestName%]> %expiry%"
+    - wait 5t 
+    }
+  - narrate "<&4>----------------------------------------------------"
+  
+world_events:
+  type: world
+  debug: false
+  events:
+    on world loads:
+      - execute as_server 'citizens reload'
+
+    on player kills entity:    
+    # provides emeralds on mob kills (including mob-type npc's)
+
+      # clear queue if victim is not a mob AND is not an npc.
+      - if !<context.entity.is_mob> && !<context.entity.is_npc> queue clear
+      # further select-out passive mobs and players
+      - if 'sheep|horse|wolf|chicken|cow|pig|squid|bat|player' contains <context.entity.entity_type> queue clear
+
+      # remaining kills should be player killing hostile mobs, therefore give random loot.
+      - define loot <util.random.int[1].to[100]>
+      - if %loot% >= 75 {
+        - give i@emerald qty:2 to:<context.damager.inventory> 
+        - queue clear }
+      - if %loot% >= 35 {
+        - give i@emerald qty:1 to:<context.damager.inventory> 
+        - queue clear }
+

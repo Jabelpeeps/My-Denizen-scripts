@@ -43,6 +43,7 @@
   #  * Re-work the special attack arrow handling to use the 'script:' option in the shoot command instead of the current flag-based system. (DONE)
   #  * Fix damage recording so that only 100% damage is recorded. (atm you can apparently inflict 150%+ before the npc's die.)
   #  * Add more options to configure Boss and Minion behaviours. (for example, using bodyguard mode for Minions, having different weapons in each stage.)
+  #  * convert whole script to use dSentry (by mcmonkey) attack loop & target finding, in place of Sentry.
   #  * Add option for Bosses to load scenery and/or structures in the arena (will require WorldEdit and Depenizen)
   #  * Re-work scoreboard setup to use denizen scoreboard commands, and explore possibility of having a rotating set of scoreboards for each stat.
   #  * add in a true Boss Health Bar now that denizen supports them. (probably keeping the current bar for displaying minion health.)
@@ -120,11 +121,8 @@
     # http://wiki.citizensnpcs.co/Sentry
     Boss Health: 500
     Boss Strength: 3
-    Boss Armor: 3
+    Boss Armour: 3
     Boss Attack Range: 20       # sentry default is 10, but I am running the bossfight in a fairly large cavern
-
-    # Awareness range will still trigger special attacks.
-    Boss Awareness Range: 55
     Boss Movement Speed: 1
     Boss Attack Rate: 2    # sentry default is 2 (higher number is longer interval between attacks)
 
@@ -170,9 +168,13 @@
     Cuboid Spawn Area Poss 2: "304,112,477,frozen_spring"
 
     # What will trigger the start of the boss fight? 
-    # proximity             (Activate if a player walks into the proximity specified in the "Boss Awareness Range" constant value above)
+    # proximity             (Activate if a player walks into the proximity specified in the "Boss Awareness Range" constant value below)
     # damage                (Activate boss fight when damaged by a player)
     Bossfight Activator: proximity 
+    # Awareness range is the distance used to trigger the fight if 'proxmity' is selected above, and is separate from the attack range 
+    # specified further up. This is also the range in which special attacks will be triggered, and - when empty of players - will trigger
+    # the boss's self-healing and reset timer.
+    Boss Awareness Range: 55
 
     # Currently the script supports 4 battle stages, as currently written. A stage is reached/unlocked when the boss is down to a specified health percentage.
     # You decide the boss health percentage, minion names, the quantity to spawn, NPC types and how/where they spawn.
@@ -225,11 +227,17 @@
     Minion One Name: Crawlie
     Minion One Weapon: none
     Minion One Health: 10
-    Minion One Quantity: 50
+    Minion One Quantity: 40
+    Minion One Attack Range: 20
     Minion One Strength: 1
-    Minion One Armor: 1
+    Minion One Armour: 1
     Minion One Speed: 1.5
-
+    
+    # Guardmode can be:-
+    # lookout    (stays where spawned until attacking, attacks when players come within the attack range) or 
+    # bodyguard  (follows the boss, and attacks any player who harms the boss, stops attacking when player leaves attack range)
+    Minion One Guardmode: lookout
+    
     # lightning             (lightning bolt with sound)
     # explode               (harmless explosion effect with sound)
     # none                  (no effect)
@@ -256,14 +264,16 @@
     Minion Two Weapon: none
     Minion Two Health: 20
     Minion Two Quantity: 30
+    Minion Two Attack Range: 10
     Minion Two Strength: 2
-    Minion Two Armor: 2
+    Minion Two Armour: 2
     Minion Two Speed: 1.4
+    Minion Two Guardmode: bodyguard
     Minion Two Spawn Effect: lightning
     Minion Two Spawn Location: boss
     
   # Boss Fight - Stage Three
-    Stage Three Boss Health Percentage: 50
+    Stage Three Boss Health Percentage: 60
     Stage Three Boss Aura: flame
     Stage Three Special Attack: "TNT Drop"
     Stage Three Special Attack Quantity: 40
@@ -275,16 +285,18 @@
     Minion Three Zombiemod: none
     Minion Three Name: FireElement
     Minion Three Weapon: none
-    Minion Three Health: 30
+    Minion Three Health: 20
     Minion Three Quantity: 15
+    Minion Three Attack Range: 30
     Minion Three Strength: 2
-    Minion Three Armor: 5
+    Minion Three Armour: 5
     Minion Three Speed: 1
+    Minion Three Guardmode: bodyguard
     Minion Three Spawn Effect: explode
     Minion Three Spawn Location: boss
 
   # Boss Fight - Stage Four
-    Stage Four Boss Health Percentage: 35
+    Stage Four Boss Health Percentage: 40
     Stage Four Boss Aura: flame
     Stage Four Special Attack: Firestarter
     Stage Four Special Attack Quantity: 40
@@ -298,9 +310,11 @@
     Minion Four Weapon: none
     Minion Four Health: 50
     Minion Four Quantity: 10
+    Minion Four Attack Range: 20
     Minion Four Strength: 3
-    Minion Four Armor: 8
-    Minion Four Speed: 0.8
+    Minion Four Armour: 6
+    Minion Four Speed: 1
+    Minion Four Guardmode: bodyguard
     Minion Four Spawn Effect: lightning
     Minion Four Spawn Location: cuboid
     
@@ -316,7 +330,8 @@
     # Due to a 'feature' in citizens, that triggers the spawn and despawn actions several times during the processing of this 
     # assignment action, I have needed to use a flag to stop the spawn+despawn scripts from running until this one has completed.
     # I am also using it to stop multiple copies of the same action script running at the same time.
-    - if <npc.has_flag[ActionsFinished]> flag npc ActionsFinished:!   
+    - if !<npc.has_flag[ActionActive]> flag npc ActionActive
+    - flag npc PreventImmediateDespawn duration:2s
     
     # For this script, the click trigger is only used to return the boss's health.
     - trigger name:click state:true
@@ -347,7 +362,7 @@
     - execute as_server "sentry attackrate <npc.constant[Boss Attack Rate]>" silent
     - execute as_server "sentry speed <npc.constant[Boss Movement Speed]>" silent
     - execute as_server "sentry strength <npc.constant[Boss Strength]>" silent
-    - execute as_server "sentry armor <npc.constant[Boss Armor]>" silent
+    - execute as_server "sentry armor <npc.constant[Boss Armour]>" silent
     - execute as_server "sentry range <npc.constant[Boss Attack Range]>" silent
     - if "<npc.constant[Boss Weapon]>" != none execute as_server "sentry equip <npc.constant[Boss Weapon]>" silent
 
@@ -362,11 +377,12 @@
     #- flag npc "Minion Awareness Range:<npc.constant[Boss Awareness Range].add[-10]>"
     
     # see note at top of this script for an explanation of what this last flag does.
-    - flag npc ActionsFinished    
+    - flag npc ActionActive:!    
  #--------------------------Boss 'on spawn'-------------------------------------------------------------------------------------------
     on spawn:
     # see note at top of the 'on assignment' script for an explanation of what this flag does.
-    - if <npc.has_flag[ActionsFinished]> flag npc ActionsFinished:! else queue clear
+    - if <npc.has_flag[ActionActive]> queue clear
+    - flag npc PreventImmediateDespawn duration:2s
     
     # These commands are specific to our world, as it uses a fixed cuboid location. It puts out any fires remaining behind from the previous fight.
     # Adjust the coordinates to match your world, or remove entirely if you want the fires to continue burning.
@@ -375,6 +391,8 @@
     
     # Teleport boss back to starting point.
     - teleport <npc> 'location:<npc.constant[Boss Spawn Location]>'
+    # add global flag so that Minions of this boss can easy access his NPC.id
+    - flag global NewMoonBossID:<npc>
 
     # Every time the boss spawns after it's been killed, it'll run through the following process to do some 'clean-up' from the previous battle.
     #
@@ -385,6 +403,7 @@
     #
     # Remove the "R.I.P" sign it placed when and where it died.
     #
+    - heal <npc>
     - if <npc.has_flag[BossDied]> {
       - flag npc BossDied:!
       - foreach <global.flag[AllMinions].as_list||li@> {
@@ -401,8 +420,6 @@
     } 
     # the npc now adds itself back to the list of bosses (if needed)
     - if <global.flag[ListOfBosses]||li@> !contain <npc> flag global ListOfBosses:->:<npc>
-    # see note at top of the 'on assignment' script for an explanation of what this flag does.
-    - flag npc ActionsFinished
     
     # Now the clean up is finished it is time to set up the Minecraft scoreboard.
     #
@@ -499,9 +516,9 @@
         - flag %value% <npc.name>MinsDamage:! }
       - announce "<green>-----------------------------------------------" }
     - if <npc.has_flag[BossSpectatorList]> {
-      - foreach <npc.flag[BossSpectatorList].as_list> {
+      - foreach <npc.flag[BossSpectatorList].as_list||li@> {
         - if <npc.flag[BossHitList].as_list> contains %value% flag npc BossSpectatorList:<-:%value% }
-      - if <npc.flag[BossSpectatorList].size> >= 1 announce "Spectators <npc.flag[BossSpectatorList].formatted>" }
+      - if <npc.flag[BossSpectatorList].size> >= 1 announce "Spectators <npc.flag[BossSpectatorList].formatted||none>" }
    
     # Now we check to see if the "Drop Loot on Death" is set to "Yes", and if so run the task called "NewMoonBoss Drop the Loot" instantly.
     - if '<npc.constant[Drop Loot on Death]>' == "Yes" run "NewMoonBoss Drop the Loot" instantly
@@ -519,6 +536,7 @@
       - flag npc Scoreboard:!
     }
     # Clear all the flags used during the fight to set boss up for the next fight.
+    - flag npc PreviousHealth:!
     - flag npc BossHitList:!
     - flag npc BossSpectatorList:!
     - flag npc BossStage:!
@@ -532,11 +550,12 @@
 
  #--------------------------Boss 'on despawn'-----------------------------------------------------------------------------------------
     on despawn:
-    # first a check to stop this script running if the boss is already dead.
-    - if <npc.has_flag[BossDied]||null> queue clear
     # see note at top of the 'on assignment' script for an explanation of what this flag does.
-    - if <npc.has_flag[ActionsFinished]> flag npc ActionsFinished:! else queue clear
+    - if <npc.has_flag[PreventImmediateDespawn]> queue clear
     - narrate target:p@Jabelpeeps "running despawn actions now"
+    
+    # a check to stop this script running if the boss is already dead.
+    - if <npc.has_flag[BossDied]||null> queue clear
     
     # otherwise, this script contains a sub-set of the 'on death' script commands.
     - define SpecialAttackQueue '<npc.name>SpecialAttack'
@@ -554,6 +573,7 @@
     }
     - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
       - flag npc 'Stage%value%Minions:!' }
+    - flag npc MinionSpawnedStage:!
       
     - if <npc.flag[BossHitList].size> >= 1 {
       - foreach <npc.flag[BossHitList].as_list> {
@@ -573,26 +593,24 @@
         else if <npc.flag[Scoreboard]> == minionhealth execute as_server "scoreboard objectives remove <npc.name.substring[1,6]>.MinionDmg" silent
       - flag npc Scoreboard:!
     }
+    - flag npc PreviousHealth:!
     - flag npc BossHitList:!
     - flag npc BossSpectatorList:!
     - flag npc BossStage:!
     - flag npc BossPlayerList:!
     - flag npc ActiveSpecialAttackStage:!
     - flag global ListOfBosses:<-:<npc>
-    - flag npc MinionSpawnedStage:!
     - flag npc AllMyMinions:!
     - flag npc BossResetTimer:!
     - flag npc HealActive:!
     
-    # see note at top of the 'on assignment' script for an explanation of what this flag does.
-    - flag npc ActionsFinished    
  #--------------------------Boss 'on damaged'-----------------------------------------------------------------------------------------
     on damaged:
+    # this line checks a flag to stop the script running if it is already running. The flag is removed at the end of this script.
+    - if <npc.has_flag[DamageScriptActive]> determine cancelled else flag npc DamageScriptActive
     # As this script is not automatically linked to a player, it uses <context.damager> instead, with the first line checking whether this is a
-    # player, and cancelling the damage if not.
-    # NB the script also uses the easily confused <context.damage> (no 'r') tag to call the amount of damage done.
-    - if !<context.damager.is_player> determine cancelled
-    - define player <context.damager>
+    # player, and cancelling the damage if not - the effect being that only players can damage the npc. 
+    - if !<context.damager.is_player> determine cancelled else define player <context.damager>
           
     # If the player managed to get through the "entry proximity" without being added to the "BossPlayerList" it will do it now.
     - if <npc.flag[BossPlayerList].as_list||li@> !contains %player% flag npc BossPlayerList:->:%player%
@@ -600,15 +618,24 @@
     - if <npc.flag[BossHitList].as_list||li@> !contains %player% flag npc BossHitList:->:%player%
     # To count the number of times the player has hit the boss. Add "+1" every time they trigger this.
     - flag %player% <npc.name>HitCount:++
-    # The damage amount is then added to the total damage flag. But first we need to subtract the armour value that we configured in the initial
-    # constants; as this is how Sentry handles it.
-    - define Armour '<npc.constant[Boss Armor]>'
-    - define Damage <context.damage.sub[%Armour%]>
-    - if %Damage% > 0 flag %player% <npc.name>TotalDamage:+:%Damage%
+    
+    # The damage amount is then added to the total damage flag. But first we need to subtract the current health from the previous health (or the
+    # max health if this is the first run of the script).
+    - define MaxHealth '<npc.constant[Boss Health]>'
+    - define pHealth <npc.flag[PreviousHealth]||%MaxHealth%>
+    - define cHealth <npc.health||0>
+    - define DamageDealt <m:%pHealth%-%cHealth%>
+    - if %DamageDealt% > 0 flag %player% <npc.name>TotalDamage:+:%DamageDealt%
+    
+    # This line flags the npc with their current health, so that it can be used to calculate damage next time this script is triggered.
+    - flag npc PreviousHealth:<npc.health>
 
     # Add the damage amount into the Minecraft scoreboard. (Right hand side of players screen).
-    - if <npc.flag[Scoreboard]||null> == bosshealth && %Damage% > 0 { 
-      - execute as_server "scoreboard players add <context.damager.name> <npc.name.substring[1,9]>.Damage %Damage%" silent }
+    - if <npc.flag[Scoreboard]||null> contains bosshealth && %DamageDealt% > 0 { 
+      - execute as_server "scoreboard players add <context.damager.name> <npc.name.substring[1,9]>.Damage %DamageDealt%" silent }
+      
+    # removal of this flag allows the script to run again.    
+    - flag npc DamageScriptActive:! 
     
     # The following IF's check the boss's current health. If their health is lower than the specified percentage in the "Stage One/Two/Three/Four 
     # Boss Health Percentage" constant values, it will activate the next fighting stage. It flags (flag npc BossStage:One etc) the stage it's at because 
@@ -628,7 +655,7 @@
         - run "NewMoonBoss Fight" }
     - if %EnabledStages% contains Four && %BossStage% contains Three && %BossHealth% <= '<npc.constant[Stage Four Boss Health Percentage]>' {
         - flag npc BossStage:Four
-        - run "NewMoonBoss Fight" }
+        - run "NewMoonBoss Fight" } 
         
  #--------------------------Boss 'on click'-------------------------------------------------------------------------------------------
     on click:
@@ -650,7 +677,7 @@
     - if '<npc.constant[Bossfight Activator]>' == "proximity" && !<npc.has_flag[BossStage]> && !<npc.has_flag[BossDied]> {
       - flag npc BossStage:One
       - run "NewMoonBoss Fight" }
-      else if <npc.has_flag[BossStage]> run "NewMoonBoss Fight"
+    #  else if <npc.has_flag[BossStage]> run "NewMoonBoss Fight"
       
     # this line ends the queue for the self heal task, if it has been activated.
     - define BossHealQueue <npc.name>_BossHeal
@@ -684,7 +711,7 @@
  #====================================================================================================================================
 "NewMoonBoss Fight":
   type: task
-  debug: false
+  debug: true
   script:
   # first a check to stop this script running if the boss is already dead.
   - if <npc.has_flag[BossDied]||null> queue clear
@@ -692,17 +719,17 @@
   # Every time a stage kicks off, this is the script it runs.
   # Initially it announces the boss health percentage to the "BossPlayerList" (so not everyone on the server gets the message, only the participants. 
   # It also runs the "Health Status Bar" script which displays a dynamic text based health bar.
-  - ^define BossStage <npc.flag[BossStage]||none>
-  - ^define SpecialAttack '<npc.constant[Stage %BossStage% Special Attack]||null>'
-  - ^narrate "<red>Boss Stage %BossStage%> - Health <npc.health.percentage.as_int><&pc>" targets:<npc.flag[BossPlayerList].as_list||null>
-  - ^run "Health Status Bar"
+  - define BossStage <npc.flag[BossStage]||none>
+  - define SpecialAttack '<npc.constant[Stage %BossStage% Special Attack]||null>'
+  - narrate "<red>Boss Stage %BossStage%> - Health <npc.health.percentage.as_int><&pc>" targets:<npc.flag[BossPlayerList].as_list||null>
+  - run "Health Status Bar"
 
   # Flags the boss with the current stage special attack, used by the special attack tasks to run (or not if it's not relevant for that stage anymore).
-  - ^flag npc "CurrentSpecialAttack:%SpecialAttack%"
+  - flag npc "CurrentSpecialAttack:%SpecialAttack%"
 
   # Each stage can also have a different effect play around/near the boss, this is checked here and applied with the "execute as_server" command.
   # If there is no effect for this stage, it removes it with the "--play none" parameter below.
-  - ^if flame|heart|smoke|ender|potbreak|explosion contains "<npc.constant[Stage %BossStage% Boss Aura]||none>" {
+  - if flame|heart|smoke|ender|potbreak|explosion contains "<npc.constant[Stage %BossStage% Boss Aura]||none>" {
       - execute as_server "npc sel <npc.id>" silent
       - execute as_server "npc effect --play none" silent
       - execute as_server "npc effect --play <npc.constant[Stage %BossStage% Boss Aura]>" silent }
@@ -730,7 +757,6 @@
   - if '<npc.constant[Stage %BossStage% Spawn Minions]>' == "Yes" && <npc.flag[MinionSpawnedStage]||none> != %BossStage% {
     - flag npc MinionSpawnedStage:%BossStage%
     - define MinionSpawn '<npc.constant[Minion %BossStage% Spawn Location]>'
-    - flag global NewMoonBossID:<npc>
     - if %MinionSpawn% == cuboid define cuboid <npc.flag[cuboid]>
       else if %MinionSpawn% == boss {
         - define location <npc.location.simple>
@@ -746,42 +772,46 @@
     }
   }
   # start minion attacking a random player if not already doing so.
-  - if <npc.flag[Stage%BossStage%Minions].size> >= 1 {
-    - foreach <npc.flag[Stage%BossStage%Minions].as_list> {
-      - if <%value%.navigator.target_entity.type||null> != player attack %value% target:<npc.flag[BossPlayerList].as_list.random||cancel> }
-  }
+  #- if <npc.flag[Stage%BossStage%Minions].size> >= 1 {
+  #  - foreach <npc.flag[Stage%BossStage%Minions].as_list> {
+  #    - if <%value%.navigator.target_entity.type||null> !contain player attack %value% target:<npc.flag[BossPlayerList].as_list.random||cancel> } }
+  
   # The server then select the boss ID again and also adds "player" type as it's target.
-  - ^execute as_server "npc sel <npc.id>" silent
-  - ^execute as_server "sentry target add entity<&co>player" silent
+  - execute as_server "npc sel <npc.id>" silent
+  - execute as_server "sentry target add entity<&co>player" silent
 
   # Each stage can have a different special attack. This is where that process kicks off. First it checks
   # what the attack is for the particular stage the boss is on, then flags the NPC with the
   # "ActiveSpecialAttackStage" which is used by the special attack tasks to run or cancel further down.
-  - ^if "Poison Arrow|Wither Arrow|Weakness Arrow|Slowness Arrow" contains %SpecialAttack% {
+  - if "Poison Arrow|Wither Arrow|Weakness Arrow|Slowness Arrow" contains %SpecialAttack% {
     - flag npc ActiveSpecialAttackStage:Arrows
     - run "NewMoonBoss Special Attack - Arrows" }
-    else if %SpecialAttack% == "Rain Arrows" {
-      - flag npc "ActiveSpecialAttackStage:Rain Arrows"
-      - run "NewMoonBoss Special Attack - Rain Arrows" }
-    else if %SpecialAttack% == "Lightning Bolt" {
-      - flag npc "ActiveSpecialAttackStage:Lightning Bolt"
-      - run "NewMoonBoss Special Attack - Lightning Bolt" }
-    else if %SpecialAttack% == "Lightning Storm" {
-      - flag npc "ActiveSpecialAttackStage:Lightning Storm"
-      - run "NewMoonBoss Special Attack - Lightning Storm" }
-    else if %SpecialAttack% == "TNT" {
-      - flag npc "ActiveSpecialAttackStage:TNT"
-      - run "NewMoonBoss Special Attack - TNT" }
-    else if %SpecialAttack% == "TNT Drop" {
-      - flag npc "ActiveSpecialAttackStage:TNT Drop"
-      - run "NewMoonBoss Special Attack - TNT Drop" }
-    else if %SpecialAttack% == "Throw" {
-      - flag npc "ActiveSpecialAttackStage:Throw"
-      - run "NewMoonBoss Special Attack - Throw" }
-    else if %SpecialAttack% == "Firestarter" {
-      - flag npc "ActiveSpecialAttackStage:Firestarter"
-      - run "NewMoonBoss Special Attack - Firestarter" }
-    else if %SpecialAttack% == none flag npc ActiveSpecialAttackStage:!
+    else if "Rain Arrows|Lightning Bolt|Lightning Storm|TNT|TNT Drop|Throw|Firestarter" contains %SpecialAttack% {
+      - flag npc ActiveSpecialAttackStage:%SpecialAttack%
+      - run "NewMoonBoss Special Attack - %SpecialAttack%" }
+    else flag npc ActiveSpecialAttackStage:!
+      
+    # else if %SpecialAttack% == "Rain Arrows" {
+      # - flag npc "ActiveSpecialAttackStage:Rain Arrows"
+      # - run "NewMoonBoss Special Attack - Rain Arrows" }
+    # else if %SpecialAttack% == "Lightning Bolt" {
+      # - flag npc "ActiveSpecialAttackStage:Lightning Bolt"
+      # - run "NewMoonBoss Special Attack - Lightning Bolt" }
+    # else if %SpecialAttack% == "Lightning Storm" {
+      # - flag npc "ActiveSpecialAttackStage:Lightning Storm"
+      # - run "NewMoonBoss Special Attack - Lightning Storm" }
+    # else if %SpecialAttack% == "TNT" {
+      # - flag npc "ActiveSpecialAttackStage:TNT"
+      # - run "NewMoonBoss Special Attack - TNT" }
+    # else if %SpecialAttack% == "TNT Drop" {
+      # - flag npc "ActiveSpecialAttackStage:TNT Drop"
+      # - run "NewMoonBoss Special Attack - TNT Drop" }
+    # else if %SpecialAttack% == "Throw" {
+      # - flag npc "ActiveSpecialAttackStage:Throw"
+      # - run "NewMoonBoss Special Attack - Throw" }
+    # else if %SpecialAttack% == "Firestarter" {
+      # - flag npc "ActiveSpecialAttackStage:Firestarter"
+      # - run "NewMoonBoss Special Attack - Firestarter" }
   
   # If for some reason Sentry is delayed (known issue which I've logged here: https://github.com/jrbudda/Sentry/issues/161) this will
   # make sure if it's got no target to pick the closest player and attack them.
@@ -792,53 +822,39 @@
 "NewMoonBoss Spawn Minion":
     # NB this script is run by the boss; although after the creation of the minion, it gets a bit confused, so I saved/defined the BossID early on.
     type: task
-    debug: false
+    debug: true
     script:
-    # Here it initially defines the boss stage and then use that to pick:
-    # 1) Which effect is used to spawn the minion
-    # 2) Give it a name, a type, speed and make it a Sentry.
+    # This script defines the boss ID & stage and then use those to discover: 
+    #   1) Which effect to use to spawn the minion 
+    #   2) where to spawn the minion
+    #   3) the minion's name & type
+    # it then selects the minion, and calls the assignment script for minions, that does the rest of the work.
     
     - define BossID <global.flag[NewMoonBossID]>
     - define BossStage <%BossID%.flag[BossStage]>
+    # this if statement handles the minion's spawn effect, if configured.
     - if "<%BossID%.constant[Minion %BossStage% Spawn Effect]>" == lightning strike no_damage location:<%BossID%.flag[SpawnLocation]>
       else if "<%BossID%.constant[Minion %BossStage% Spawn Effect]>" == explode explode power:1 location:<%BossID%.flag[SpawnLocation]>
-
-    # The most effective way to create an NPC is to fit as MANY of the possible parameters into the "npc create" command
-    # as possible. This avoids a scenario where the players can witness the NPC's changing or being teleported to where
-    # you intended etc.
-    - create '<%BossID%.constant[Minion %BossStage% Type]>' '<%BossID%.constant[Minion %BossStage% Name]>' '<%BossID%.flag[SpawnLocation]>' 'traits:sentry|' save:Minion
+    # The most effective way to create an NPC is to fit as MANY of the possible parameters into the "npc create" command as possible. 
+    # This avoids a scenario where the players can witness the NPC's changing or being teleported to where you intended etc.
+    - create '<%BossID%.constant[Minion %BossStage% Type]>' '<%BossID%.constant[Minion %BossStage% Name]>' '<%BossID%.flag[SpawnLocation]>' save:Minion
+    # select the new minion
     - execute as_server "npc select <entry[Minion].created_npc.id>" silent
-    - if '<%BossID%.constant[Minion %BossStage% Type]>' == zombie && '<%BossID%.constant[Minion %BossStage% Zombiemod]>' != none {
-        - execute as_server "npc zombiemod <%BossID%.constant[Minion %BossStage% Zombiemod]>" silent }
-        else {
-        - if '<%BossID%.constant[Minion %BossStage% Type]>' contains player execute as_server "npc skin <%BossID%.constant[Minion %BossStage% Skin]>" silent
-        - if '<%BossID%.constant[Minion %BossStage% Age]>' == baby execute as_server "npc age baby -l" silent }
-    
-    # This sets the minions owner to be the boss. It's only use seems to be to quiet the NPC death notification errors that happen with no owner set.
-    #- execute as_server "npc owner <%BossID%.name>" silent
-    
-    # setup various sentry options for minions 
-    - execute as_server "npc speed <%BossID%.constant[Minion %BossStage% Speed]>" silent
-    - execute as_server "sentry respawn -1" silent
-    - if '<%BossID%.constant[Minion %BossStage% Weapon]>' != none execute as_server "sentry equip <%BossID%.constant[Minion %BossStage% Weapon]>" silent
-    - execute as_server "sentry health <%BossID%.constant[Minion %BossStage% Health]>" silent
-    - execute as_server "sentry strength <%BossID%.constant[Minion %BossStage% Strength]>" silent
-    - execute as_server "sentry armor <%BossID%.constant[Minion %BossStage% Armor]>" silent
-    - execute as_server "sentry target add entity<&co>player" silent
     # Assign the "NewMoonBoss Minion Basics" script to each minion.
     - execute as_server 'npc assign --set "NewMoonBoss Minion Actions"' silent
-
+    
  #====================================================================================================================
 "NewMoonBoss Minion Actions":
   # this script is run by the Minions, on it being assigned to them, by the script above.  Therefore <npc> tags here refer to the Minion.
   type: assignment
-  debug: false
+  debug: true
   actions:
   # -------------------------Minion 'on assignment'------------------------------------------------------------------------------------
     on assignment:
+    # first some triggers
     - trigger name:click state:true
     - trigger name:damage state:true
-    
+    # then some definitions 
     - define BossID <global.flag[NewMoonBossID]>
     - define BossStage <%BossID%.flag[BossStage]>
 
@@ -850,13 +866,31 @@
     # to the "AllMyMinions" list which is checked during by the Prevent Self Harm script. (now part of Items_and_world_scripts.)
     - flag npc MinionCreator:%BossID%
     
-    # In order to calculate damage correctly during the fight, the minion needs to be flagged with its own armour value.  This is easy to
+    # In order to calculate damage correctly during the fight, the minion needs to be flagged with its own initial health.  This is easy to
     # do here as we already have the needed def's set up.
-    - flag npc 'ArmourValue:<%BossID%.constant[Minion %BossStage% Armor]>'
+    - flag npc 'MaxHealth:<%BossID%.constant[Minion %BossStage% Health]>'
 
     # Minion adds itself into the boss's minion list flags.
     - flag %BossID% Stage%BossStage%Minions:->:<npc>
     - flag %BossID% AllMyMinions:->:<npc>
+    
+    # now we setup the various config options for the minion, as defined in the constants, for the current BossStage.
+    - execute as_server "npc select <npc.id>" silent
+    - trait state:true sentry
+    - if '<%BossID%.constant[Minion %BossStage% Type]>' == zombie && '<%BossID%.constant[Minion %BossStage% Zombiemod]>' != none {
+        - execute as_server "npc zombiemod <%BossID%.constant[Minion %BossStage% Zombiemod]>" silent }
+        else {
+        - if '<%BossID%.constant[Minion %BossStage% Type]>' contains player execute as_server "npc skin <%BossID%.constant[Minion %BossStage% Skin]>" silent
+        - if '<%BossID%.constant[Minion %BossStage% Age]>' == baby execute as_server "npc age baby -l" silent }
+    - execute as_server "npc speed <%BossID%.constant[Minion %BossStage% Speed]>" silent
+    - execute as_server "sentry respawn -1" silent
+    - if '<%BossID%.constant[Minion %BossStage% Weapon]>' != none execute as_server "sentry equip <%BossID%.constant[Minion %BossStage% Weapon]>" silent
+    - if '<%BossID%.constant[Minion %BossStage% Guardmode]>' contains bodyguard execute as_server "sentry guard <%BossID%.name>" silent
+    - execute as_server "sentry health <%BossID%.constant[Minion %BossStage% Health]>" silent
+    - execute as_server "sentry strength <%BossID%.constant[Minion %BossStage% Strength]>" silent
+    - execute as_server "sentry armor <%BossID%.constant[Minion %BossStage% Armour]>" silent
+    - execute as_server "sentry range <%BossID%.constant[Minion %BossStage% Attack Range]>" silent
+    - execute as_server "sentry target add entity<&co>player" silent
     
     # # If player exits this proximity range the minion will stop attacking. (Temporary until Sentry is fixed)
     # - flag npc "Minion Awareness Range:<%BossID%.flag[Minion Awareness Range]>"
@@ -867,11 +901,9 @@
     # this section contains commands to be run whenever a Minion dies, for any reason.
     
     # Remove the minion from the "AllMinions" global flag (used to clean up if minions left behind for whatever reason).
-    - ^flag global AllMinions:<-:<npc>
+    - flag global AllMinions:<-:<npc>
     # Remove the minion from the boss's minion list.
-    - ^flag <npc.flag[MinionCreator]> AllMyMinions:<-:<npc>
-    # Remove the Sentry trait to prevent errors from unhandled triggers on npcdeath.
-    - trait sentry state:false
+    - flag <npc.flag[MinionCreator]> AllMyMinions:<-:<npc>
     
   #--------------------------Minion 'on death by player'-------------------------------------------------------------------------------
     on death by player:
@@ -880,9 +912,9 @@
     # I have forgotten why I added the next line, disabled to see if I remember...
     #- ^if <npc.has_flag[Dead]> queue clear else flag npc Dead 
     
-    - ^define Boss <npc.flag[MinionCreator]>
+    - define Boss <npc.flag[MinionCreator]>
     # This adds 1 to a player flag keeping count of minions killed.
-    - ^flag player <%Boss%.name>MinsKilled:++
+    - flag player <%Boss%.name>MinsKilled:++
     # If the scoreboard is set to record minions killed count, add one to the player score.
     - if <%Boss%.flag[Scoreboard]||null> == minionkills execute as_server "scoreboard players add <player.name> <%Boss%.name.substring[1,5]>.MinionKills 1" silent
   #--------------------------Minion 'on click'-----------------------------------------------------------------------------------------
@@ -899,21 +931,28 @@
   #--------------------------Minion 'on damaged'---------------------------------------------------------------------------------------
     on damaged:
     # This script is very similar to the Boss's 'on damage' script, so comments will be limited.
-    - if !<context.damager.is_player> queue clear
-    - define player <context.damager>
+    - if <npc.has_flag[DamageScriptActive]> determine cancelled else flag npc DamageScriptActive
+    - if !<context.damager.is_player> determine cancelled else define player <context.damager>
     - define Boss <npc.flag[MinionCreator]>
+    
+    # if health has been reduced to 0, remove the Sentry trait to prevent errors from unhandled triggers on npcdeath.
+    - if '<npc.health.as_int||0>' < 1 trait sentry state:false
     
     - if <%Boss%.flag[BossPlayerList].as_list||li@> !contains %player% && %player% != %Boss% flag <%Boss%> BossPlayerList:->:%player% 
     - if <%Boss%.flag[BossHitList].as_list||li@> !contains %player% && %player% != %Boss% flag <%Boss%> BossHitList:->:%player% 
     
+    - define MaxHealth <npc.flag[MaxHealth]>
+    - define pHealth <npc.flag[PreviousHealth]||%MaxHealth%>
+    - define cHealth <npc.health||0>
+    - define DamageDealt <m:%pHealth%-%cHealth%>
+    - if %DamageDealt% > 0 flag %player% <%Boss%.name>MinsDamage:+:%DamageDealt%
     - flag %player% <%Boss%.name>MinsHit:++
     
-    - define Armour <npc.flag[ArmourValue]>
-    - define Damage <context.damage.sub[%Armour%]>
-    - if &Damage% > 0 flag %player% <%Boss%.name>MinsDamage:+:%Damage%
-    
-    - if <%Boss%.flag[Scoreboard]> == 'minionhealth' && %Damage% > 0 { 
-      - execute as_server "scoreboard players add <context.damager.name> <%Boss%.name.substring[1,6]>.MinionDmg %Damage% silent }
+    - flag npc PreviousHealth:<npc.health> 
+    - flag npc DamageScriptActive:! 
+        
+    - if <%Boss%.flag[Scoreboard]> == 'minionhealth' && %DamageDealt% > 0 { 
+      - execute as_server "scoreboard players add <context.damager.name> <%Boss%.name.substring[1,6]>.MinionDmg %DamageDealt% silent }
  #=====================================================================================================================================
 "NewMoonBoss Self Heal":
 
@@ -945,52 +984,53 @@
 # This task will only run if the "Boss Reset Timer" constant value is set to 1 or higher and when the last player leaves the boss proximity. When a
 # player enters proximity, the "BossResetTimer" flag timer is NULL'ed, so when the task runs it fails on the first IF and boss is not reset.
 
-    type: task
-    debug: false
-    script:
-    - ^if <npc.has_flag[BossResetTimer]> {
-      - define SpecialAttackQueue '<npc.name>SpecialAttack'
-      - if <queue.exists[%SpecialAttackQueue%]> queue 'queue:%SpecialAttackQueue%' clear
-      - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
-        - if <npc.has_flag[Stage%value%Minions]> {
-          - foreach <npc.flag[Stage%value%Minions].as_list> {
-            - if <npc> != %value% remove %value% 
-          }
+  type: task
+  debug: false
+  script:
+  - ^if <npc.has_flag[BossResetTimer]> {
+    - define SpecialAttackQueue '<npc.name>SpecialAttack'
+    - if <queue.exists[%SpecialAttackQueue%]> queue 'queue:%SpecialAttackQueue%' clear
+    - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
+      - if <npc.has_flag[Stage%value%Minions]> {
+        - foreach <npc.flag[Stage%value%Minions].as_list> {
+          - if <npc> != %value% remove %value% 
         }
       }
-      - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
-        - flag npc Stage%value%Minions:! }
-       
-      - narrate "<red>BOSS EVENT<&co> <white><npc.name><red> has been reset." targets:<npc.flag[BossPlayerList].as_list
-      - if <npc.flag[BossHitList].size> >= 1 {
-        - foreach <npc.flag[BossHitList].as_list> {
-          - flag %value% <npc.name>TotalDamage:!
-          - flag %value% <npc.name>HitCount:!
-          - flag %value% <npc.name>MinsKilled:!
-          - flag %value% <npc.name>MinsHit:!
-          - flag %value% <npc.name>MinsDamage:! }
-      }
-      - execute as_server "npc sel <npc.id>" silent
-      - execute as_server "npc effect --play none" silent
-      - execute as_server "sentry target clear" silent
-      - if <npc.has_flag[Scoreboard]> {
-        - if <npc.flag[Scoreboard]> == bosshealth execute as_server "scoreboard objectives remove <npc.name.substring[1,9]>.Damage" silent
-          else if <npc.flag[Scoreboard]> == minionkills execute as_server "scoreboard objectives remove <npc.name.substring[1,5]>.MinionKills" silent
-          else if <npc.flag[Scoreboard]> == minionhealth execute as_server "scoreboard objectives remove <npc.name.substring[1,6]>.MinionDmg" silent
-      }
-      - teleport <npc> "location:<npc.constant[Boss Spawn Location]>"
-      - heal <npc>
-      - flag npc BossHitList:!
-      - flag npc BossSpectatorList:!
-      - flag npc BossStage:!
-      - flag npc BossPlayerList:!
-      - flag npc ActiveSpecialAttackStage:!
-      - flag npc MinionSpawnedStage:!
-      - flag npc Scoreboard:!
-      - flag npc AllMyMinions:!
-      - flag npc BossResetTimer:!
-      - flag npc HealActive:!
     }
+    - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
+      - flag npc Stage%value%Minions:! }
+     
+    - narrate "<red>BOSS EVENT<&co> <white><npc.name><red> has been reset." targets:<npc.flag[BossPlayerList].as_list
+    - if <npc.flag[BossHitList].size> >= 1 {
+      - foreach <npc.flag[BossHitList].as_list> {
+        - flag %value% <npc.name>TotalDamage:!
+        - flag %value% <npc.name>HitCount:!
+        - flag %value% <npc.name>MinsKilled:!
+        - flag %value% <npc.name>MinsHit:!
+        - flag %value% <npc.name>MinsDamage:! }
+    }
+    - execute as_server "npc sel <npc.id>" silent
+    - execute as_server "npc effect --play none" silent
+    - execute as_server "sentry target clear" silent
+    - if <npc.has_flag[Scoreboard]> {
+      - if <npc.flag[Scoreboard]> == bosshealth execute as_server "scoreboard objectives remove <npc.name.substring[1,9]>.Damage" silent
+        else if <npc.flag[Scoreboard]> == minionkills execute as_server "scoreboard objectives remove <npc.name.substring[1,5]>.MinionKills" silent
+        else if <npc.flag[Scoreboard]> == minionhealth execute as_server "scoreboard objectives remove <npc.name.substring[1,6]>.MinionDmg" silent
+    }
+    - teleport <npc> "location:<npc.constant[Boss Spawn Location]>"
+    - heal <npc>
+    - flag npc PreviousHealth:!
+    - flag npc BossHitList:!
+    - flag npc BossSpectatorList:!
+    - flag npc BossStage:!
+    - flag npc BossPlayerList:!
+    - flag npc ActiveSpecialAttackStage:!
+    - flag npc MinionSpawnedStage:!
+    - flag npc Scoreboard:!
+    - flag npc AllMyMinions:!
+    - flag npc BossResetTimer:!
+    - flag npc HealActive:!
+  }
 
 "NewMoonBoss Special Attack - Arrows":
 #=====================================================================================

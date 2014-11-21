@@ -31,11 +31,28 @@ JarvusCreeperQuest:
       - wait 1
       - narrate format:Jarvus "I've not met you before... <&o>you from another village?"
       - wait 10t
-      - narrate "<blue>---------> <gray>Talk to <gold>Jarvus<gray> in server chat."
       - flag player 'Jarvus Creeper Quest:Quest not accepted'
       - if <player.flag[QuestList].as_list||li@> !contain 'Jarvus Creeper Quest' flag player 'QuestList:->:Jarvus Creeper Quest'
       - disengage 
-    }
+      }    
+      # if listener is complete, give reward and set flag with timed expiry to allow players to repeat the quest when it clears.
+      else if '<player.flag[Jarvus Creeper Quest]>' == 'Complete - return to Jarvus for reward' {
+      - narrate format:Jarvus "Welcome back <gold><player.name.display.replace[~]><white>!"
+      - wait 1
+      - random {
+        - narrate format:Jarvus "The <green>green<white> blood on you shows me you fought hard."
+        - narrate format:Jarvus "Your burnt eyebrows tells me it was a close fight!"
+        - narrate format:Jarvus "I smell gunpowder, someone's been busy..."
+        - narrate format:Jarvus "I'm sure the battle rocked! (and rolled!)" }
+      - wait 1
+      - narrate format:Jarvus "As promised, here is your reward... <green> 15 Emeralds!"
+      - wait 10t
+      - narrate format:Jarvus "Come back tomorrow if you want another go"
+      - give emerald qty:15
+      - flag player 'Jarvus Creeper Quest:Completed' 
+      - flag player 'Jarvus Creeper Quest Cooldown' duration:23h
+      - queue clear 
+      }
       else {
         - narrate format:Jarvus "Howdy <gold><player.name.display.replace[~]><white>, killed many <gold>Creepers<white> lately?"
         - wait 1
@@ -46,8 +63,9 @@ JarvusCreeperQuest:
           - narrate format:Jarvus "How do they walk so fast with such short legs?"
           - narrate format:Jarvus "They all look top-heavy to me, they need to go!" }
         - wait 10t
-        - narrate "<blue>---------> <gray>Talk to <gold>Jarvus<gray> in server chat."
       }
+    - narrate "<blue>---------> <gray>Talk to <gold>Jarvus<gray> in server chat."
+    
     on click:
     - engage 2s
     - narrate format:Jarvus "Don't creep up on me like that! Just talk to me ok?"
@@ -59,7 +77,7 @@ JarvusCreeperQuest:
     # the commands here stop the chat appearing the usual format, and displays it in a way that mimics the pm formatting.
     - determine passively cancelled
     - narrate "<gray>[ <yellow>You<gray> -> <yellow>Jarvus<gray> ] '<white><context.message><gray>'"
-    - wait 30t
+    - wait 20t
     
     # during cooldown period, give time remaining + some chat, before ending the script.
     - if '<player.has_flag[Jarvus Creeper Quest Cooldown]>' {
@@ -69,7 +87,7 @@ JarvusCreeperQuest:
       - queue clear }
       
     # The remaining sections all check the status of quest flag, and present info +/- options depending on progress through the quest.
-    # Firstly, a section to run if the flag is empty (not set).
+    # Firstly, a section to run if the flag is empty (not set), or the player has previously not accepted the quest.
     - if '<player.flag[Jarvus Creeper Quest]||Quest not accepted>' == 'Quest not accepted' {
       - flag player 'Jarvus Creeper Quest:Awaiting response...'
       - random {
@@ -87,7 +105,8 @@ JarvusCreeperQuest:
       - narrate format:Jarvus "Are you ready to slay some more <gold>Creeepers<white>?"
       - wait 10t
       - narrate "<blue>---------> <gray>Reply in chat with:- '<gold>Yes<gray>' or '<gold>No<gray>'"
-    
+      - queue clear
+      }
     # The next section is active after the section above has finished, and will respond in various ways depending on the player's chat.  
     # It starts by checking that the quest flag is set correctly. (i.e. has the value it was flagged in the previous section.)
     - if '<player.flag[Jarvus Creeper Quest]>' == 'Awaiting response...' {
@@ -111,32 +130,14 @@ JarvusCreeperQuest:
           - wait 10t
           - narrate "<blue>---------> <gray>or '<gold>Repeat<gray>' (to be reminded of the question)" }
       - queue clear }
-    
-    # if listener is active, say random encouragement text.
+    }
+    # if listener is active, say random encouragement text. (not yet added random bits)
     - if '<player.flag[Jarvus Creeper Quest]>' == 'Quest in Progress' {
       - narrate format:Jarvus "You haven't killed enough <gold>Creepers<white> yet, come"
       - wait 10t
       - narrate format:Jarvus "back for your reward when you have killed <gold>10<white>."
-      - queue clear }
-    }
-    # if listener is complete, give reward and set flag with timed expiry to allow players to repeat the quest when it clears.
-    - if '<player.flag[Jarvus Creeper Quest]>' == 'Complete - return to Jarvus for reward' {
-      - narrate format:Jarvus "Welcome back <gold><player.name.display.replace[~]><white>!"
-      - wait 1
-      - random {
-        - narrate format:Jarvus "The <green>green<white> blood on you shows me you fought hard."
-        - narrate format:Jarvus "Your burnt eyebrows tells me it was a close fight!"
-        - narrate format:Jarvus "I smell gunpowder, someone's been busy..."
-        - narrate format:Jarvus "I'm sure the battle rocked! (and rolled!)" }
-      - wait 1
-      - narrate format:Jarvus "As promised, here is your reward... <gold> 15 Emeralds!"
-      - wait 10t
-      - narrate format:Jarvus "Come back tomorrow if you want another go"
-      - give emerald qty:15
-      - flag player 'Jarvus Creeper Quest:Completed' 
-      - flag player 'Jarvus Creeper Quest Cooldown' duration:23h
-      - queue clear }
-        
+      }
+    
     on exit proximity:
     # the first section removes the 'Awaiting response...' state of the quest flag if the player walks away at that stage, and then taunts them a bit...
     - if '<player.flag[Jarvus Creeper Quest]>' == 'Awaiting response...' {
@@ -144,7 +145,6 @@ JarvusCreeperQuest:
       - narrate format:Jarvus "You heading off? I take it that means <gold>'No'"
       - wait 1
       - inject locally RandomTaunt
-      - queue clear
     }    
     # This section narrates a random farewell message to players who are at other stages of the quest.
     - wait 1
@@ -162,20 +162,22 @@ JarvusCreeperQuest:
   - narrate format:Jarvus "Will you accept this quest <gold><player.name.display.replace[~]><white>?"
   - wait 10t
   - narrate "<blue>---------> <gray>Reply in chat with:- '<gold>Yes<gray>' or '<gold>No<gray>'"
+  - queue clear
   
   RandomTaunt:
   - random {
-    - narrate format:Jarvus "Are you going to get your sword sharpened?"
-    - narrate format:Jarvus "Do you need a new string on your bow?"
-    - narrate format:Jarvus "Off to get your armour polished, are you?"
+    - narrate format:Jarvus "Do you need to get your sword sharpened?"
+    - narrate format:Jarvus "Is the string on your bow a bit loose?"
+    - narrate format:Jarvus "Having your armour polished, are you?"
     - narrate format:Jarvus "You're not scared of creepers are you?"
-    - narrate format:Jarvus "Come back when you're feeling brave enough." }  
+    - narrate format:Jarvus "Come back when you're feeling brave enough." }
+  - queue clear
   
 JarvusListenerComplete:
   Type: Task
   debug: false
   Script:
-  - narrate "<green>-[<gold>Quest<green>]-<white> Well done! You have killed 10 Creepers!" 
+  - narrate "<green>-[<gold>Quest<green>]-<white> Well done! You have killed <gold>10 Creepers<white>!" 
   - wait 10t
   - narrate "<green>-[<gold>Quest<green>]-<white> Return to <gold>Jarvus<white> for your reward!"
   - flag player 'Jarvus Creeper Quest:Complete - return to Jarvus for reward'

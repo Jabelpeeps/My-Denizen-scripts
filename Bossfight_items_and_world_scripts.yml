@@ -687,12 +687,12 @@
       - modifyblock <%chest%.add[l@0,1,0]> air 
       - modifyblock %chest% air }
   #---------------------------------------------------------------------------------------------------------------------------
-    # The next event is to show the "blood" effect when you hit a Boss. It uses the the "drip_lava" effect but draws 300 of 
-    # them to make it look like a bloody mist. Thanks to blankiito for this effect!  
-    on npc damaged by player:
-    # the line below originally contained the extra conditional of '&& !<context.entity.has_flag[NoBlood]>' but this flag isn't used or set anywhere.
-    - if <global.flag[ListOfBosses].as_list||li@> contains <context.entity> {
-      - playeffect location:<context.entity.location> effect:DRIP_LAVA radius:10 qty:200 offset:0.15 }   
+    # # The next event is to show the "blood" effect when you hit a Boss. It uses the the "drip_lava" effect but draws 300 of 
+    # # them to make it look like a bloody mist. Thanks to blankiito for this effect!  
+    # on npc damaged by player:
+    # # the line below originally contained the extra conditional of '&& !<context.entity.has_flag[NoBlood]>' but this flag isn't used or set anywhere.
+    # - if <global.flag[ListOfBosses].as_list||li@> contains <context.entity> {
+      # - playeffect location:<context.entity.location> effect:DRIP_LAVA radius:10 qty:200 offset:0.15 }   
   #-------------------------------------------------------------------------------------------------------------------------------
     # There is a chance the NPC (boss or minions) can hurt themselves, so even though it's not the most effective world script, 
     # it will at least check to see if the "damager" is the boss or a minion and if so, cancel the damage
