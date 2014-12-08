@@ -481,84 +481,84 @@
   
     # Mobcorn - script performs checks and then calls task script "mobcorn time"
     on player right clicks entity with i@Mobcorn:
-    - ^if !<context.entity.is_mob> && <global.flag[AllMinions].as_list||li@> !contains <context.entity> {
-      - narrate "<red>You can only use Mobcorn on Mobs!"
-      - queue clear }
-    - ^if <global.flag[ListOfBosses].as_list||li@> contains <context.entity> {
-      - narrate "<red>You can't use Mobcorn on Bosses!"
-      - queue clear }
-    - ^if !<player.has_flag[Mobcorn_Cooldown]> {
-      - flag <player> "Mobcorn_Cooldown" duration:30s
-      - run "Mobcorn Time" def:<context.entity> 
-      - queue clear }
-    - ^narrate "<white><player.flag[Mobcorn_Cooldown].expiration.formatted><red> before you can use <white>Mobcorn<red> again."  
+      - if !<context.entity.is_mob> && <global.flag[AllMinions].as_list||li@> !contains <context.entity> {
+        - narrate "<red>You can only use Mobcorn on Mobs!"
+        - queue clear }
+      - if <global.flag[ListOfBosses].as_list||li@> contains <context.entity> {
+        - narrate "<red>You can't use Mobcorn on Bosses!"
+        - queue clear }
+      - if !<player.has_flag[Mobcorn_Cooldown]> {
+        - flag <player> "Mobcorn_Cooldown" duration:30s
+        - run "Mobcorn Time" def:<context.entity> 
+        - queue clear }
+      - narrate "<white><player.flag[Mobcorn_Cooldown].expiration.formatted><red> before you can use <white>Mobcorn<red> again."  
        
     # Herder - captures mobs, for release later on. NB does not save detail of mob, only type.
     on player right clicks entity with i@Herder:
-    - if <player.flag[HerderList].size||0> >= 3 narrate "<red>The <white>Herder<red> is full and cannot capture any more souls..."
-      else if <context.entity.is_mob> {
-        - flag <player> HerderList:->:<context.entity.entity_type>
-        - playeffect location:<context.entity.location> effect:witch_magic
-        - remove <context.entity>
-        - if <player.flag[HerderList].size> == 1 narrate "<red>You have trapped the soul of a <player.flag[HerderList].formatted>..."
-          else if <player.flag[HerderList].size> >= 2 narrate "<red>You have trapped the souls of <player.flag[HerderList].formatted>.." }
+      - if <player.flag[HerderList].size||0> >= 3 narrate "<red>The <white>Herder<red> is full and cannot capture any more souls..."
+        else if <context.entity.is_mob> {
+          - flag <player> HerderList:->:<context.entity.entity_type>
+          - playeffect location:<context.entity.location> effect:witch_magic
+          - remove <context.entity>
+          - if <player.flag[HerderList].size> == 1 narrate "<red>You have trapped the soul of a <player.flag[HerderList].formatted>..."
+            else if <player.flag[HerderList].size> >= 2 narrate "<red>You have trapped the souls of <player.flag[HerderList].formatted>.." }
 
     on player right clicks block with i@Herder:
-    - if <player.has_flag[HerderList]> {
-      - narrate "<red>Releasing <player.flag[HerderList].formatted>..."
-      - define location <location.cursor_on.simple>
-      - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
-      - foreach <player.flag[HerderList].as_list> {
-        - spawn %value% location:<%cuboid%.get_spawnable_blocks.random> }
-      - flag <player> "HerderList:!" }
+      - if <player.has_flag[HerderList]> {
+        - narrate "<red>Releasing <player.flag[HerderList].formatted>..."
+        - define location <player.location.cursor_on.range[6].simple>
+        - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
+        - foreach <player.flag[HerderList].as_list> {
+          - spawn %value% location:<%cuboid%.get_spawnable_blocks.random> }
+        - flag <player> "HerderList:!" }
       
     # This script will teleport any player, where no cooldown is in effect, to a "safe" location within a 20 block radius. Above or below ground.
     # WARNING: This will allow players to get into protected buildings!!
     on player right clicks with i@PhaseShifter:
-    - if !<player.has_flag[PhaseShifter_Cooldown]> {
-      - flag <player> "PhaseShifter_Cooldown" duration:3s
-      - if !<player.has_flag[PhaseShifter_Narrate_Cooldown]> {
-        - random {
-          - narrate "<white><player.name.display><red> shimmers and disappears..." targets:<player.location.find.players.within[10]>
-          - narrate "<white><player.name.display><red> teleports to a nearby location..." targets:<player.location.find.players.within[10]>
-          - narrate "<white>With a puff of smoke, <white><player.name.display><red> teleports not too far away.." targets:<player.location.find.players.within[10]> }
-        }
-      - flag <player> "PhaseShifter_Narrate_Cooldown" duration:20s
-      - playsound location:<player.location> sound:enderman_teleport
-      - playeffect location:<player.location> effect:large_smoke
-      - define location <player.location.simple>
-      - define cuboid <el@val[<l@%location%.add[l@-20,-10,-20]>|<l@%location%.add[l@20,20,20]>].as_cuboid>
-      - teleport <player> location:<%cuboid%.get_spawnable_blocks.random>
-      - playsound location:<player.location> sound:enderman_teleport
-      - playeffect location:<player.location> effect:large_smoke }
+      - if !<player.has_flag[PhaseShifter_Cooldown]> {
+        - flag <player> "PhaseShifter_Cooldown" duration:3s
+        - if !<player.has_flag[PhaseShifter_Narrate_Cooldown]> {
+          - random {
+            - narrate "<white><player.name.display><red> shimmers and disappears..." targets:<player.location.find.players.within[10]>
+            - narrate "<white><player.name.display><red> teleports to a nearby location..." targets:<player.location.find.players.within[10]>
+            - narrate "<white>With a puff of smoke, <white><player.name.display><red> teleports not too far away.." targets:<player.location.find.players.within[10]> }
+          }
+        - flag <player> "PhaseShifter_Narrate_Cooldown" duration:20s
+        - playsound location:<player.location> sound:enderman_teleport
+        - playeffect location:<player.location> effect:large_smoke
+        - define location <player.location.simple>
+        - define cuboid <el@val[<l@%location%.add[l@-20,-10,-20]>|<l@%location%.add[l@20,20,20]>].as_cuboid>
+        - teleport <player> location:<%cuboid%.get_spawnable_blocks.random>
+        - playsound location:<player.location> sound:enderman_teleport
+        - playeffect location:<player.location> effect:large_smoke }
     
     # Foolsgold - modified from original (which displayed blocks) as mining is not enabled in our quest world.
     on player right clicks block with i@FoolsGold:
-    - if !<player.has_flag[Fools_Gold_Cooldown]> {
-      - flag player "Fools_Gold_Cooldown" duration:60s
-      - define location <player.location.cursor_on.simple>
-      - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
-      - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
-      - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
-      - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s }
-      else narrate "<white><player.flag[Fools_Gold_Cooldown].expiration.formatted><red> before you can use <white>Fool's Gold<red> again."  
+      - if !<player.has_flag[Fools_Gold_Cooldown]> {
+        - flag player "Fools_Gold_Cooldown" duration:60s
+        - define location <player.location.cursor_on.range[10].simple>
+        - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
+        - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
+        - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
+        - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s }
+        else narrate "<white><player.flag[Fools_Gold_Cooldown].expiration.formatted><red> before you can use <white>Fool's Gold<red> again."  
           
     # Shoot fireballs in the direction of where the cursor is, they have "weight" so it gives a "bullet drop" effect.
     # As configured here, will not damage blocks or set protected zones on fire.
     # If you wish to enable the above, they are options you can add to the shoot command.
     on player right clicks with i@Meteorite:
-    - if !<player.has_flag[Meteorite_Cooldown]> {
-      - flag <player> "Meteorite_Cooldown" duration:3s
-      - shoot e@fireball height:0.05 gravity:0.01 }  
+      - if !<player.has_flag[Meteorite_Cooldown]> {
+        - flag <player> "Meteorite_Cooldown" duration:3s
+        - shoot e@fireball height:0.05 gravity:0.01 }  
       
- #============================================================================================================================
+   # ----------- Scripts for the special bows ----------  
     on entity damaged by arrow:
     # this section contains def's and a catch-all to immediately end script if weapon is vanilla, or arrow was not fired by a player.
     - if !<context.damager.is_player> || '<context.damager.item_in_hand.scriptname||null>' == null queue clear
     - define hitter <context.damager>
     - define victim <context.entity>
     
-    # Bow of Decay
+   # Bow of Decay
     - if '<%hitter%.item_in_hand.scriptname.contains[Bow of Decay]>' {
       - cast wither duration:10 power:1 %victim%
       - playsound location:<%victim%.location> sound:wither_death volume:2 pitch:0.01
@@ -567,20 +567,21 @@
         - narrate "<red>You feel your flesh peeling away...strange voices in your head..so much hate.." targets:%victim% }
       - queue clear }
       
-    # MerryGoRound
+   # MerryGoRound
     - if '<%hitter%.item_in_hand.scriptname.contains[MerryGoRound]>' {
       - if <%victim%.is_player> && "!<%victim%.has_flag[Hit by MerryGoRound]>" {
-        - flag %victim% "Hit by MerryGoRound" duration:10s
+        - flag %victim% "Hit by MerryGoRound" duration:120s
         - narrate "<red>The eery twisted music of a deserted, foggy circus makes you turn...round and round..." targets:%victim% }
       - rotate %victim% duration:5s }
-      
+    
+   # ----------- Scripts for the hand held items ----------
     on entity damaged by player:
     # this section contains def's and a catch-all to immediately end script if weapon is vanilla.
     - if '<context.damager.item_in_hand.scriptname||null>' == null queue clear
     - define hitter <context.damager>
     - define victim <context.entity>
     
-    # first up - Hammer of the Gods   
+   # first up - Hammer of the Gods   
     - if '<%hitter%.item_in_hand.scriptname.contains[Hammer of the Gods]>' {
       - if <%victim%.is_player> && '!<%victim%.has_flag[Hit by Gods Hammer]>'  {
         - flag %victim% "Hit by Gods Hammer" duration:120s
@@ -588,14 +589,14 @@
       - strike destination:<%victim%.location> 
       - queue clear }
       
-    # next is Lifestealer
+   # next is Lifestealer
     - if '<%hitter%.item_in_hand.scriptname.contains[Lifestealer]>' {
       - playsound location:<%victim%.location> sound:enderdragon_growl volume:0.4 pitch:0.01
       - heal %hitter% 1
       - hurt %victim% 1 
       - queue clear }
     
-    # now Bloodsucker
+   # now Bloodsucker
     - if <%hitter%.item_in_hand.scriptname.contains[Bloodsucker]> {
       - define location <%victim%.location.simple>
       - if !<%hitter%.has_flag[bsCooldown]> && <%hitter%.flag[bsBatList].size||0> == 0 {
@@ -618,7 +619,7 @@
           - attack %value% target:%victim% }
         - queue clear }
       } 
-    # and finally the PTD (personal teleportation device) - first a line to cancel damage, and then events for right and left clicks
+   # and finally the PTD (personal teleportation device) - first a line to cancel damage, and then events for right and left clicks
     - if '<%hitter%.item_in_hand.scriptname.contains[PTD]>' determine cancelled
     
     on player right clicks with i@PTD:
@@ -648,8 +649,7 @@
       
       else narrate "<red>Your PTD v0.3 is out of memory. You cannot store any more coordinates."
       
-    # The following two events run when a player quits or dies. This is to clean up/remove
-    # any bats that were spawned with the Bloodsucker item.
+   # The following two events run when a player quits or dies. This is to clean up/remove any bats that were spawned with the Bloodsucker item.
     on player quits:
     - if <player.flag[bsBatList].size> >= 1 {
       - foreach <player.flag[bsBatList].as_list> {
@@ -669,23 +669,29 @@
   type: world
   debug: false
   events:
+    # # This section is to help ensure that damage from projectiles is correctly accounted for in the totals for bosses and minions.
+    # on player shoots bow:
+      # - if !<context.entity.has_flag[PlayerBossList]> queue clear
+      # - flag global 'Arrow.<context.projectile.as_entity.escaped>:<context.entity>' duration:3s
+    
+    
     # This section is relevant if the boss drop uses the "playerchest" method. It controls who can access the contents of the chest. If the player flag 
     # "LootChestLocation" does not match the location of the chest it uses "determine cancelled" to prevent the inventory window from showing up.
     on player opens chest:
-    - define chest <context.inventory.location>
-    - if '<global.flag[LootChestList].as_list||null>' contains %chest% && <player.flag[LootChestLocation]||null> != %chest% {
-        - narrate "<red>You cannot access the contents of this chest."
-        - determine cancelled }
+      - define chest <context.inventory.location>
+      - if '<global.flag[LootChestList].as_list||null>' contains %chest% && <player.flag[LootChestLocation]||null> != %chest% {
+          - narrate "<red>You cannot access the contents of this chest."
+          - determine cancelled }
 
     # If the chest location is on the player flag and the global "GlobalLootChestLocation" list it will despawn when it's closed.
     on player closes chest:
-    - define chest <context.inventory.location>
-    - if <player.flag[LootChestLocation]||null> == %chest% && '<global.flag[LootChestList].as_list||null>' contains %chest% && %chest% != null {
-      - narrate "<red>Chest has been removed..."
-      - flag <player> LootChestLocation:!
-      - flag global LootChestList:<-:%chest%
-      - modifyblock <%chest%.add[l@0,1,0]> air 
-      - modifyblock %chest% air }
+      - define chest <context.inventory.location>
+      - if <player.flag[LootChestLocation]||null> == %chest% && '<global.flag[LootChestList].as_list||null>' contains %chest% && %chest% != null {
+        - narrate "<red>Chest has been removed..."
+        - flag <player> LootChestLocation:!
+        - flag global LootChestList:<-:%chest%
+        - modifyblock <%chest%.add[l@0,1,0]> air 
+        - modifyblock %chest% air }
   #---------------------------------------------------------------------------------------------------------------------------
     # # The next event is to show the "blood" effect when you hit a Boss. It uses the the "drip_lava" effect but draws 300 of 
     # # them to make it look like a bloody mist. Thanks to blankiito for this effect!  

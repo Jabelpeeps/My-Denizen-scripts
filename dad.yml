@@ -21,7 +21,7 @@ Dad:
     # the first line adds a flag to each player, so that Jewel's announcements don't spam the console.
     - if !<player.has_flag[dadchat]> flag <player> dadchat
     - engage
-    - run dadsay "def:Hello, <player.name.display>."
+    - run dadsay "def:Hello, <player.name.display.replace[~]>."
     - random {
       - run dadsay "def:Did you sleep well? It's about time you woke up!"
       - run dadsay "def:Good to see you up and about at last!"

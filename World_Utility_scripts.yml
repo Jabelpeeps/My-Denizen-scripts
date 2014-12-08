@@ -17,7 +17,8 @@ Quests_command:
   script:
   - if !<player.has_flag[QuestList]||false> {
     - narrate "You have not discovered any list-able quests yet."
-    - queue clear }
+    - queue clear
+    }
   - narrate "<&4>----------------------------------------------------"
   - narrate "<&5>So far, you have discovered the following quests..."
   - wait 5t
@@ -28,7 +29,8 @@ Quests_command:
     - define QuestName %value%
     # these lines handle the progress of the quests, adding text to %expiry% when appropriate.
     - if '<player.has_flag[%QuestName% Cooldown]>' {
-      - define expiry '<&c>- Repeatable in - <&e><player.flag[%QuestName% Cooldown].expiration.formatted|||>' }
+      - define expiry '<&c>- Repeatable in - <&e><player.flag[%QuestName% Cooldown].expiration.formatted|||>'
+      }
       else if 'Awaiting response...|Quest in Progress' contains <player.flag[%QuestName%]> define expiry ' '
       else define expiry '<&a>- Available Now'
     # these lines attempt to put the second line of text into a column, by adding spaces to the end of the questname, however this is
@@ -39,7 +41,8 @@ Quests_command:
       - if '!<def[value].contains_any_case_sensitive[l|t|i|I| ]>' foreach next
       - if '<def[value].contains_any_case_sensitive[I|t| ]>' define PadLength <def[PadLength].add[0.4]>
         else if <def[value].contains_case_sensitive[i]> define PadLength <def[PadLength].add[0.8]>
-        else if <def[value].contains_case_sensitive[l]> define PadLength <def[PadLength].add[0.6]> }
+        else if <def[value].contains_case_sensitive[l]> define PadLength <def[PadLength].add[0.6]>
+        }
     - define PadLength <def[PadLength].mul[1.6].add[20]>
     # this line takes the final definitions, and narrates them in a nice colourful format.
     - narrate "<&2><def[QuestName].pad_right[<def[PadLength].as_int>]><&e> - <player.flag[%QuestName%]> %expiry%"
@@ -55,19 +58,21 @@ world_events:
       - execute as_server 'citizens reload'
 
     on player kills entity:    
-    # provides emeralds on mob kills (including mob-type npc's)
+    # provides emeralds on mob kills 
 
-      # clear queue if victim is not a mob AND is not an npc.
-      - if !<context.entity.is_mob> && !<context.entity.is_npc> queue clear
-      # further select-out passive mobs and players
-      - if 'sheep|horse|wolf|chicken|cow|pig|squid|bat|player' contains <context.entity.entity_type> queue clear
+      # # clear queue if victim is not a mob.
+      # - if !<context.entity.is_mob> && !<context.entity.is_npc> queue clear
+      # select-out passive mobs and players
+      - if 'sheep|horse|wolf|chicken|cow|pig|squid|bat|player|villager|npc' contains <context.entity.entity_type> queue clear
 
       # remaining kills should be player killing hostile mobs, therefore give random loot.
       - define loot <util.random.int[1].to[100]>
       - if %loot% >= 75 {
         - give i@emerald qty:2 to:<context.damager.inventory> 
-        - queue clear }
+        - queue clear
+        }
       - if %loot% >= 35 {
         - give i@emerald qty:1 to:<context.damager.inventory> 
-        - queue clear }
+        - queue clear
+        }
 
