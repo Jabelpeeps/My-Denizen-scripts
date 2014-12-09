@@ -480,7 +480,7 @@
       }
     # remove bossbar from players.
     - foreach <npc.flag[BossPlayerList].as_list||li@> {
-      - adjust %value% show_boss_bar: 
+      - adjust %value% show_boss_bar:!
       }
     # Remove/comment out the next 2 lines if you don't want a sign marking where the Boss Died.
     # What it does is flag where the boss died and post a sign with the boss's name, followed by "was defeated here". 
@@ -591,7 +591,7 @@
     
     # remove bossbar 
     - foreach <npc.flag[BossPlayerList].as_list||li@> {
-      - adjust %value% show_boss_bar  
+      - adjust %value% show_boss_bar:!  
       }
     - if <npc.flag[BossHitList].size> >= 1 {
       - foreach <npc.flag[BossHitList].as_list> {
@@ -710,7 +710,7 @@
     # Add players to the spectator list, which shows up in the battle stats after the boss fight.
     - if <npc.flag[BossSpectatorList].as_list||li@> !contains <player> && <player.name> != <npc.name> flag npc BossSpectatorList:->:<player>
     # add a 'bossbar' with the boss's current health
-    - adjust <player> show_boss_bar:<npc.health>|<npc.name> 
+    - adjust <player> show_boss_bar:<npc.health.percentage.mul[2].as_int||0>|<npc.name> 
     
     # If proximity was set as the "NewMoonBoss Fight Activator" in the constant values at the top, this will
     # start the fight if there isn't already an active fight stage.
@@ -728,7 +728,7 @@
     on exit proximity:
     - define BossRange '<npc.constant[Boss Awareness Range]>'
     # remove 'bossbar' from exiting player.
-    - adjust <player> show_boss_bar:
+    - adjust <player> show_boss_bar:!
     # remove npc.id from player flag
     #- flag player PlayerBossList:<-:<npc>    
     # The wait 10 allows for a buffer where players are on the edge of the proximity moving in and out.
