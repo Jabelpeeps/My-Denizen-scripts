@@ -1,33 +1,34 @@
 # Boss Fight - Multi-stage and Highly Configurable
   #
   # Currently updated to run with:-
-  # Citizens 2 (build #1179)
-  # Denizen 0.9.6 (build #135)
-  # JSentry 1.0
+  # Citizens 2 (build #1186)
+  # Denizen 0.9.6 (build #1544)
+  # JSentry 1.0 (a denizen script that replaces the Sentry plugin.)
   #
   # To assign to an NPC, type:
   # /npc assign --set "NewMoonBoss"
   #
   # DISCLAIMER:
   # ===========
-  # This is an advanced script. You should test this script before you use it on your LIVE server. Some of the item drops ignore
-  # ZONE PROTECTION. So if you play on a strict server you will want to disable those items by removing them from the "NewMoonBoss
-  # Determine Loot" script.
+  # This is an advanced script. You should test this script before you use it on your LIVE server. Some of the item drops
+  # ignore ZONE PROTECTION. So if you play on a strict server you will want to disable those items by removing them from 
+  # the "NewMoonBoss Determine Loot" script, in the separate Bossfight_loot yaml file.
   #
   # DESCRIPTION:
   # ============
-  # This is a four stage boss fight with a bunch of simple configuration options that will allow you to create a unique boss fight.
-  # You can decide how many stages you want to enable, how difficult the boss should be (health, armour, strength), whether it should
-  # spawn minions and if so, how many, how difficult etc. The boss has several different 'special attacks' that can be used directly
-  # on players or inside a "cuboid", which you have to specify in the constant values at the top of the script.
+  # This is a four stage boss fight with a bunch of simple configuration options that will allow you to create a unique 
+  # boss fight. You can decide how many stages you want to enable, how difficult the boss should be (health, armour, 
+  # strength), whether it should spawn minions and if so, how many, how difficult etc. The boss has several different 
+  # 'special attacks' that can be used directly on players or inside a "cuboid", which you have to specify in the constant 
+  # values at the top of the script.
   #
   # The boss can heal or reset itself if no one is in range.
   #
   # When the boss is killed, it can drop random loot (defined in item scripts that are located in the separate 
-  # Bossfight_items_and_world_scripts.yml) directly into players inventory, on the floor around the boss or into secure chests for
-  # each of the boss fighters.
+  # Bossfight_items_and_world_scripts.yml) directly into players inventory, on the floor around the boss or into secure 
+  # chests for each of the boss fighters.
   #
-  # At the end of the fight, it will show a text scoreboard that shows total damage, hit count, minion kills etc for each player.
+  # At the end of the fight, it will show a summary in-chat of total damage, hit count, minion kills etc for each player.
   #
   # FEATURES:
   # =========
@@ -40,32 +41,34 @@
   #
   # TODO/POSSIBLE FUTURE FEATURES:
   # ==============================
-  #  * Re-work the special attack arrow handling to use the 'script:' option in the shoot command instead of the current flag-based system. (DONE)
-  #  * add in a true Boss Health Bar now that denizen supports them. (probably keeping the current bar for displaying minion health.) (DONE)
-  #  * Fix damage recording so that only 100% damage is recorded. (appears to be impossible, afaik, so postponed until JSentry conversion achieved.)
-  #  * Add more options to configure Boss and Minion behaviours. (for example, using bodyguard mode for Minions, having different weapons in each stage.) WIP
-  #  * convert whole script to use JSentry attack loop & target finding, in place of Sentry.
+  #  * Re-work the special attack arrow handling to use the 'script:' option in the shoot command (DONE)
+  #  * add in a true Boss Health Bar. (keeping the current bar for displaying minion health.) (DONE)
+  #  * Fix damage recording so that only 100% damage is recorded. (DONE)
+  #  * Add options to change Boss and Minion behaviours. (e.g. using bodyguard mode for some Minion stages.) (SOME ADDED) 
+  #  * convert whole script to use JSentry attack loop & target finding, in place of Sentry. (WIP)
   #  * Add option for Bosses to load scenery and/or structures in the arena (will require WorldEdit and Depenizen)
-  #  * Re-work scoreboard setup to use denizen scoreboard commands, and explore possibility of having a rotating set of scoreboards for each stat.
+  #  * Re-work scoreboard setup to use denizen scoreboard commands/ 
+  #  * explore possibility of having a rotating set of scoreboards for each stat.
   #  * look into using yaml commands for saving and loading boss configurations. (probably the last to be done)
   #
   # NOTE: 
   # ====
-  # If you want to use this on more than one NPC you simply need to do a FIND on the word 'NewMoonBoss' and REPLACE it with your NPC name. Then
-  # make another copy of the script and do another FIND/REPLACE for every boss NPC that will use this.
+  # If you want to use this on more than one NPC you simply need to do a FIND on the word 'NewMoonBoss' and REPLACE it 
+  # with your NPC name. Then make another copy of the script and do another FIND/REPLACE for every boss NPC that will use 
+  # this.
   #
   # CREDITS:
   # ========
-  # Many thanks to mythanical for the original version of this script, and to the Denizen team for the amazing plugin, and their
-  # support on #Denizen-dev
+  # Many thanks to mythanical for the original version of this script, and to the Denizen team for the amazing plugin, and 
+  # their support on #Denizen-dev
   # 
   # Mythanical gave the following credits:-
-  # Thanks to aufdemrand, davidcernat and mcmonkey for fixing/adding things in Denizen. Thanks to Matterom and blankiito for example scripts on the work 
-  # they've done on custom items and effects.
+  # Thanks to aufdemrand, davidcernat and mcmonkey for fixing/adding things in Denizen. Thanks to Matterom and blankiito 
+  # for example scripts on the work they've done on custom items and effects.
   #
   #
-  # @author mythanical
-  # @updated by Jabelpeeps
+  # @original script by mythanical
+  # @updated/rewritten by Jabelpeeps
   # @server this script is running on:- Remypas.com (from lobby, go to Jewelcraft world.)
   # @irc EsperNet IRC Network #denizen-dev
 
@@ -77,15 +80,16 @@
   default constants:
   # Boss Specific Constants
     # --------------------------------------------------------------------------------------------------------
-    # NOTE: 'Player' entity type NPC's are fully supported by Sentry, but other types may give you some interesting, unexpected or undesired 
-    # results. Especially when you try and equip them with a weapon.
+    # NOTE: 'Player' entity type NPC's are fully supported, but other types may give you some interesting, unexpected or 
+    # undesired results. Especially when you try and equip them with a weapon.
     #
     # The following NPC types are available as part of Citizens (http://wiki.citizensnpcs.com/Types):
     #
-    # blaze, bat, cave_spider, chicken, creeper, cow, enderman (goes crazy in rain), ender_dragon (do not recommend), ghast (do not recommend),
-    # giant (massive zombie!), iron_golem, magma_cube (careful! damages nearby players), mushroom_cow, ocelot, pig, pig_zombie, player (skin name
-    # is configurable), sheep, silverfish, squid (can't walk on land...duh), snowman, wolf, skeleton, slime, spider, witch, witherboss (does not 
-    # move), villager, zombie (burns in sunlight, but invulnerable)
+    # blaze, bat, cave_spider, chicken, creeper, cow, enderman (goes crazy in rain), ender_dragon (not recommended), ghast 
+    # (not recommended), giant (massive zombie!), iron_golem, magma_cube (careful! damages nearby players), mushroom_cow, 
+    # ocelot, pig, pig_zombie, player (skin name is configurable), sheep, silverfish, squid (can't walk on land...duh), 
+    # snowman, wolf, skeleton, slime, spider, witch, witherboss (does not move), villager, zombie (burns in sunlight, but 
+    # invulnerable)
     # --------------------------------------------------------------------------------------------------------
 
     World Name: frozen_spring
@@ -113,13 +117,14 @@
     # none                  (Brawler - Swords, axes, picks, shovels, rocks, bricks, or even fish, the brawlers take the fight to the enemy, hand to hand)
     Boss Weapon: DIAMOND_SPADE
   
-    # This is the bosses starting health
+    # This is the boss's starting health
     Boss Health: 500
     # This is how many hearts of damage the boss will do per hit.
     Boss Strength: 3
-    # This is a percentage damage reduction that is applied to damage to the boss. (set to -1 for armour to be calculated from worn armour)
+    # This is a percentage damage reduction that is applied to damage to the boss. 
+    # (set to -1 for armour to be calculated from worn armour)
     Boss Armour: 40
-    # The range at which the boss will select targets to attack and/or loose track of current targets, and start the search for another.
+    # The range at which the boss will select targets to attack and/or loose track of current targets.
     Boss Attack Range: 20
     # The speed at which the boss moves when attacking.
     Boss Movement Speed: 1
@@ -135,10 +140,11 @@
     # Set to -1 if you never want the boss to respawn and be permanently destroyed on death. 
     Boss Respawn Delay: 600
 
-    # On default, boss fight will reset after 120s of inactivity. Set to 0 if you don't ever want it to reset and allow players to come back later to finish it.
+    # Boss fight will reset after the configured number of seconds of inactivity. 
+    # Set to 0 if you don't ever want it to reset and allow players to come back later to finish it.
     Boss Reset Timer: 180
 
-    # The item scripts for the loot is located at the bottom. It will give each player, that hit the boss or a minion at least once, a random item.
+    # configure "yes" to give players loot after beating the Boss, and "no" to not give loot.
     Drop Loot on Death: "Yes"
 
     # The specifies how many randomly selected loot items per player
@@ -151,7 +157,8 @@
     # playerchest           (Create a chest next to each player that only they can access)
     Loot Distribution: playerchest
     
-    # To prevent any loot chests from staying forever, give them any value other than 0 and they will expire..dropping all the loot on the floor.
+    # To prevent any loot chests from staying forever, give them any value other than 0 and they will expire..dropping all 
+    # the loot on the floor.  They will also be removed when the Boss respawns.
     Loot Chest Expiry: 300
 
     # Enable scoreboard (on right side of screen) to show either Minion Kills or Boss Health Damage by each player during the fight. 
@@ -168,21 +175,22 @@
     Cuboid Spawn Area Poss 2: "304,112,477,frozen_spring"
 
     # What will trigger the start of the boss fight? 
-    # proximity             (Activate if a player walks into the proximity specified in the "Boss Awareness Range" constant value below)
-    # damage                (Activate boss fight when damaged by a player)
+    # proximity  (Activate if a player walks into the proximity specified in the "Boss Awareness Range" constant value below)
+    # damage     (Activate boss fight when damaged by a player)
     Bossfight Activator: proximity 
-    # Awareness range is the distance used to trigger the fight if 'proxmity' is selected above, and is separate from the attack range 
-    # specified further up. This is also the range in which special attacks will be triggered, and - when empty of players - will trigger
-    # the boss's self-healing and reset timer.
+    # Awareness range is the distance used to trigger the fight if 'proxmity' is selected above, and is separate from the 
+    # attack range specified further up. This is also the range in which special attacks will be triggered, and - when empty # of players - will trigger the boss's self-healing and reset timer.
     Boss Awareness Range: 55
 
-    # Currently the script supports 4 battle stages, as currently written. A stage is reached/unlocked when the boss is down to a specified health percentage.
-    # You decide the boss health percentage, minion names, the quantity to spawn, NPC types and how/where they spawn.
-    # If you want less stages, simply remove them from the list. If you don't want any, type in "none". Make sure to type it as "One|Two|Three|Four".
-    # If you only want the first two stages, type it as: One|Two  If you want more stages, you will need to modify several sections of the script to allow this.
+    # Currently the script supports 4 battle stages, as currently written. A stage is reached/unlocked when the boss is down 
+    # to a specified health percentage. You decide the boss health percentage, minion names, the quantity to spawn, NPC types 
+    # and how/where they spawn. If you want less stages, simply remove them from the list. If you don't want any, type in 
+    # "none". Make sure to type it as "One|Two|Three|Four". If you only want the first two stages, type it as: One|Two  If 
+    # you want more stages, you will need to modify several sections of the script to allow this.
     Enabled Boss Stages: One|Two|Three|Four
     
-    # The sections below detail the separate values for each of the 4 stages of the boss fight. You should modify these to make each boss fight unique.
+    # The sections below detail the separate values for each of the 4 stages of the boss fight. You should modify these to 
+    # make each boss fight unique.
   
   # Boss Fight - Stage One
     Stage One Boss Health Percentage: 100
@@ -200,24 +208,26 @@
     # "Wither Arrow"        (Cast wither...)
     # "Weakness Arrow"      (Cast weakness...)
     # "Slowness Arrow"      (Cast slowness...)
-    # "Rain Arrows"         (Rain arrows from the sky - note: you need provide values for the "Cuboid Spawn Area Poss x" above for this to work)
+    # "Rain Arrows"         (Rain arrows from the sky - arrows are dropped within the cuboid defined above.)
     # "Lightning Bolt"      (Hit a single random player with a lightning bolt - this never misses)
-    # "Lightning Storm"     (Several damaging lightning bolts - note: you to need provide values for the "Cuboid Spawn Area Poss x" above for this to work)
+    # "Lightning Storm"     (Several damaging lightning bolts - strikes occur within the cuboid defined above.)
     # "TNT"                 (Boss tosses a block of primed tnt at a random player)
-    # "TNT Drop"            (Drop blocks of TNT in random locations in the cuboid - Minecraft/Bukkit bug prevents this from working)
-    # "Throw"               (This will cause players to be thrown from their current position to a random location inside the cuboid)
+    # "TNT Drop"            (Drop blocks of TNT in random locations in the cuboid)
+    # "Throw"               (Throw players from their current position to a random location inside the cuboid)
     # "Firestarter"         (Ignite random blocks in the cuboid)
     # none                  (No special attack)
     Stage One Special Attack: "Slowness Arrow"
     
-    # This number is only relevant to the following attacks:- "Rain Arrows", "Lightning Storm", "TNT Drop", "Throw", "Firestarter" and configures the number
-    # of the attack to be run inside the cuboid defined above.  (The other attacks target a random player, and this option will be ignored.)
+    # This number is only relevant to the following attacks:- "Rain Arrows", "Lightning Storm", "TNT Drop", "Throw", 
+    # & "Firestarter" and it configures the number of the attack events to be run inside the cuboid defined above. (The other 
+    # special attacks target a random player, and this option will be ignored.)
     Stage One Special Attack Quantity: 0
 
     # The special attack runs on a loop, repeating every...
     Stage One Special Attack Delay: 20s
 
-    # available minion options are in most cases identical to the boss options, therefore see explanations in the boss options section for details.
+    # available minion options are in most cases identical to the boss options, therefore see explanations in the boss 
+    # options section for details.
     Stage One Spawn Minions: "Yes"
     Minion One Type: cave_spider
     Minion One Skin: none
@@ -316,24 +326,25 @@
     Minion Four Spawn Effect: lightning
     Minion Four Spawn Location: cuboid
     
- #========================Action scripts==============================================================================================
+ #========================Action scripts====================================================================
   # Congratulations, if you have reached this point, you have configured all the options you need.
   # 
   # ***WARNING*** Only edit the script past this point if you know what you're doing!! ***WARNING***
   #=========================================================================================================
   
   actions:
- #--------------------------Boss 'on assignment'--------------------------------------------------------------------------------------
+ #--------------------------Boss 'on assignment'------------------------------------------------------------
     on assignment:
     # Due to a 'feature' in citizens, that triggers the spawn and despawn actions several times during the processing of this 
-    # assignment action, I have needed to use a flag to stop the spawn+despawn scripts from running until this one has completed.
-    # I am also using it to stop multiple copies of the same action script running at the same time.
+    # assignment action, I have needed to use flags to stop the spawn & despawn scripts from running until this one has 
+    # completed.
     - if !<npc.has_flag[ActionActive]> flag npc ActionActive duration:2s
     - flag npc PreventImmediateDespawn duration:2s
     
-    # For this script, the click trigger is only used to return the boss's health.
+    # For this script, the click trigger is only used to return the boss's health. (disabled when boss-bar added.)
     # - trigger name:click state:true
-    # Proximity set to the radius you specified in the "Boss Awareness Range" constant above.
+    
+    # Proximity set to the radius specified in the "Boss Awareness Range" constant.
     - trigger name:proximity state:true 'radius:<npc.constant[Boss Awareness Range]>'
     # Damage trigger does a whole bunch of stuff which I'll explain in that section.
     - trigger name:damage state:true
@@ -360,16 +371,16 @@
     - flag npc 'jsentry.armour:<npc.constant[Boss Armour].div[100]>'
     - flag npc 'jsentry.range:<npc.constant[Boss Attack Range]>'
     - if '<npc.constant[Boss Weapon]>' != none {
-      - equip <npc> 'hand:<npc.constant[Boss Weapon]>'
+      - equip <npc> 'hand:<npc.constant[Boss Weapon]>' }
     - flag npc 'jsentry.targets:player'
 
     # Put the boss stages into a flag - this will be used throughout to check which boss stages should be activated.
     - flag npc 'Enabled Boss Stages:<npc.constant[Enabled Boss Stages]>'
     # see note at top of this script for an explanation of what this last flag does.
     - flag npc ActionActive:!    
-    - action 'on spawn' 
+    - inject locally 'actions.on spawn' 
     
- #--------------------------Boss 'on spawn'-------------------------------------------------------------------------------------------
+ #--------------------------Boss 'on spawn'-----------------------------------------------------------------
     on spawn:
     # see note at top of the 'on assignment' script for an explanation of what this flag does.
     - if <npc.has_flag[ActionActive]> queue clear
@@ -421,44 +432,44 @@
     #   * miniondamage
     # It uses the "substring" to put a limit in place for the length of the boss's name because if the name is too long, the scoreboard will fail to create.  
     #
-    - ^if <npc.constant[Scoreboard]> != none && !<npc.has_flag[Scoreboard]> {
-      - ^flag npc Scoreboard:<npc.constant[Scoreboard]>
-      - ^if <npc.flag[Scoreboard]> == "bosshealth" {
+    - if <npc.constant[Scoreboard]> != none && !<npc.has_flag[Scoreboard]> {
+      - flag npc Scoreboard:<npc.constant[Scoreboard]>
+      - if <npc.flag[Scoreboard]> == "bosshealth" {
         - execute as_server "scoreboard objectives add <npc.name.substring[1,9]>.Damage dummy" silent
         - execute as_server "scoreboard objectives setDisplay sidebar <npc.name.substring[1,9]>.Damage" silent
         - queue clear }
-      - ^if <npc.flag[Scoreboard]> == "minionkills" {
+      - if <npc.flag[Scoreboard]> == "minionkills" {
         - execute as_server "scoreboard objectives add <npc.name.substring[1,5]>.MinionKills dummy" silent
         - execute as_server "scoreboard objectives setDisplay sidebar <npc.name.substring[1,5]>.MinionKills" silent
         - queue clear }
-      - ^if <npc.flag[Scoreboard]> == "minionhealth" {
+      - if <npc.flag[Scoreboard]> == "minionhealth" {
         - execute as_server "scoreboard objectives add <npc.name.substring[1,6]>.MinionDmg dummy" silent
         - execute as_server "scoreboard objectives setDisplay sidebar <npc.name.substring[1,6]>.MinionDmg" silent 
         - queue clear }
     }
 
- #--------------------------Boss 'on remove'------------------------------------------------------------------------------------------
+ #--------------------------Boss 'on remove'----------------------------------------------------------------
     on remove:
     # makes sure that the despawn actions are carried out if someone uses '/npc remove'
-    - action 'on despawn' <npc>
+    - inject locally 'actions.on despawn'
     
- #--------------------------Boss 'on death'-------------------------------------------------------------------------------------------
+ #--------------------------Boss 'on death'-----------------------------------------------------------------
     on death:
-    # When the boss dies, there is a bunch of clean-up that needs to happen. 
+    # Clean-up that needs to happen when the boss dies. 
     
-    # This flag is used to stop other events from being triggered, and to prevent certain "on spawn" commands from running unless the boss actually died. 
+    # This flag is used to stop other events from being triggered, and to prevent certain "on spawn" commands from running 
+    # unless the boss actually died. 
     - flag npc BossDied
     # This line will terminate the special attack queue immediately on the death of the Boss
-    - define SpecialAttackQueue '<npc.name>SpecialAttack'
-    - if <queue.exists[%SpecialAttackQueue%]> queue 'queue:%SpecialAttackQueue%' clear
+    - if <queue.exists[<npc.name>SpecialAttack]> queue 'queue:<npc.name>SpecialAttack' clear
     
     # Here are some 'foreach' loops to remove all the minions that were created during the various stages. 
     # Each minion was added to the boss flag list and now it simply iterates through removing each minion 
     # by substituting %value% with their NPC ID, e.g.  n@123    
     - foreach '<npc.flag[Enabled Boss Stages].as_list>' {
-      # the %value% on the next line is the Boss fight stage, from the foreach on the line above.
+    # the %value% on the next line is the Boss fight stage, from the foreach on the line above.
       - foreach '<npc.flag[Stage%value%Minions].as_list>' {  
-        # the %value% on the next lines is now the NPC ID.
+    # the %value% on the next lines is now the NPC ID.
         - flag global AllMinions:<-:%value%
         - if <npc> != %value% remove %value% 
       }                
@@ -551,7 +562,7 @@
     - flag npc BossResetTimer:!
     - flag npc HealActive:!
 
- #--------------------------Boss 'on despawn'-----------------------------------------------------------------------------------------
+ #--------------------------Boss 'on despawn'---------------------------------------------------------------
     on despawn:
     # see note at top of the 'on assignment' script for an explanation of what this flag does.
     - if <npc.has_flag[PreventImmediateDespawn]> queue clear
@@ -611,18 +622,19 @@
     - flag npc BossResetTimer:!
     - flag npc HealActive:!
     
- #--------------------------Boss 'on damaged'-----------------------------------------------------------------------------------------
+ #--------------------------Boss 'on damaged'---------------------------------------------------------------
     on damaged:
     # first a short delay to allow jsentry's damage events to complete.
     - wait 1t
-    # As this script is not automatically linked to a player, it uses <context.damager> instead, with the first line checking whether this is a
-    # player, cancelling the damage if not.
+    # As this script is not automatically linked to a player, it uses <context.damager> instead, with the next line checking 
+    # whether this is a player, cancelling the damage if not.
     - if <context.damager> matches player {
       - define player <context.damager> 
       }
       else determine cancelled
       
-    # this line checks a flag to stop the script running if it is already running. The flag is removed after the health change calculation is complete.
+    # this line checks a flag to stop the script running if it is already running - which would mess with the damage 
+    # accounting for the scoreboard.  The flag is removed after the health change calculation is complete.
     - if <npc.has_flag[DamageScriptActive]> determine cancelled else flag npc DamageScriptActive duration:1s
     
     # a flag to help track arrows fired during the bossfight, by identifying players who are in the fight with a flag.
@@ -655,9 +667,10 @@
     - foreach <npc.flag[BossPlayerList].as_list||li@> {
       - adjust %value% show_boss_bar:<npc.health.percentage.mul[2].as_int||0>|<npc.name>
       } 
-    # The following IF's check the boss's current health. If their health is lower than the specified percentage in the "Stage One/Two/Three/Four 
-    # Boss Health Percentage" constant values, it will activate the next fighting stage. It flags (flag npc BossStage:One etc) the stage it's at because 
-    # this is used to control the flow of stages and also used during the "Special Attack" loop tasks further down.
+    # The following IF's check the boss's current health. If their health is lower than the specified percentage in the "Stage 
+    # One/Two/Three/Four Boss Health Percentage" constant values, it will activate the next fighting stage. It flags (flag npc 
+    # BossStage:One etc) the stage it's at because this is used to control the flow of stages and also used during the 
+    # "Special Attack" loop tasks further down.
     - if '<npc.health.percentage.as_int||0>' < 1 queue clear
     - define BossStage <npc.flag[BossStage]||null>
     - define BossHealth <npc.health.percentage.as_int||0>
@@ -679,18 +692,20 @@
         - run "NewMoonBoss Fight" 
         }         
  
- #--------------------------Boss 'on push'--------------------------------------------------------------------------------------------
+ #--------------------------Boss 'on push'------------------------------------------------------------------
     on push:
     - if '<npc.location.distance[<npc.constant[Boss Spawn Location]>]>' > 20 {
+      - flag npc jsentry.target:!
       - anchor id:BossSpawn walknear r:3
       }
       
- #--------------------------Boss 'on enter proximity'---------------------------------------------------------------------------------
+ #--------------------------Boss 'on enter proximity'-------------------------------------------------------
     on enter proximity:
     # a flag to help track arrows fired during the bossfight.
-    - if <player.flag[PlayerBossList].as_list||li@> !contains <npc> && <player.name> != <npc.name> flag player PlayerBossList:->:<npc>
-    # When a player enters the proximity set in the "Boss Awareness Range" constant value, it'll check to see if they are already on the list
-    # and if not it will add them to the "BossPlayerList" flag. This is used for targetted narrate messages throughout the fight.
+    #- if <player.flag[PlayerBossList].as_list||li@> !contains <npc> && <player.name> != <npc.name> flag player PlayerBossList:->:<npc>
+    # When a player enters the proximity set in the "Boss Awareness Range" constant value, it'll check to see if they are 
+    # already on the list and if not it will add them to the "BossPlayerList" flag. This is used for targetted narrate 
+    # messages throughout the fight.
     - if <npc.flag[BossPlayerList].as_list||li@> !contains <player> && <player.name> != <npc.name> flag npc BossPlayerList:->:<player>
     # Add players to the spectator list, which shows up in the battle stats after the boss fight.
     - if <npc.flag[BossSpectatorList].as_list||li@> !contains <player> && <player.name> != <npc.name> flag npc BossSpectatorList:->:<player>
@@ -701,22 +716,21 @@
     # start the fight if there isn't already an active fight stage.
     - if '<npc.constant[Bossfight Activator]>' == "proximity" && !<npc.has_flag[BossStage]> && !<npc.has_flag[BossDied]> {
       - flag npc BossStage:One
-      #- run "NewMoonBoss Fight" 
+      - run "NewMoonBoss Fight" 
       } 
-    # these lines end the queue for the self heal task, if it has been activated.
-    - define BossHealQueue <npc.name>_BossHeal
-    - if <queue.exists[%BossHealQueue%]> queue 'queue:%BossHealQueue%' clear
-    # This removes a flag that will be checked after the period of inactivity specified in the "NewMoonBoss Reset Timer", so that the boss will 
-    # not be reset. (if the flag is still set, the reset goes ahead.)
+    # this line ends the queue for the self heal task, if it has been activated.
+    - if <queue.exists[<npc.name>_BossHeal]> queue 'queue:<npc.name>_BossHeal' clear
+    # This removes a flag that will be checked after the period of inactivity specified in the "NewMoonBoss Reset Timer", so 
+    # that the boss will not be reset. (if the flag is still set at the end of the timed period, the reset goes ahead.)
     - flag npc BossResetTimer:!
     
- #--------------------------Boss 'on exit proximity'----------------------------------------------------------------------------------
+ #--------------------------Boss 'on exit proximity'--------------------------------------------------------
     on exit proximity:
     - define BossRange '<npc.constant[Boss Awareness Range]>'
     # remove 'bossbar' from exiting player.
-    - adjust <player> show_boss_bar
+    - adjust <player> show_boss_bar:
     # remove npc.id from player flag
-    - flag player PlayerBossList:<-:<npc>    
+    #- flag player PlayerBossList:<-:<npc>    
     # The wait 10 allows for a buffer where players are on the edge of the proximity moving in and out.
     - wait 10s
     # If the fight has been activated (i.e. it hasn't got a null boss stage), and there are still no players in proximity
@@ -730,7 +744,7 @@
       - flag npc BossResetTimer
       - run "NewMoonBoss Reset" id:<npc.name>_ResetTimer 'delay:<npc.constant[Boss Reset Timer]>'
       }
- #====================================================================================================================================
+ #==========================================================================================================
 "NewMoonBoss Fight":
   type: task
   debug: false
@@ -738,18 +752,18 @@
   # first a check to stop this script running if the boss is already dead.
   - if <npc.has_flag[BossDied]||null> queue clear
   
-  # Every time a stage kicks off, this is the script it runs.
-  # Initially it announces the boss health percentage to the "BossPlayerList" (so not everyone on the server gets the message, only the participants. 
-  # It also runs the "Health Status Bar" script which displays a dynamic text based health bar.
+  # Every time a fight stage kicks off, this is the script it runs. Initially it announces the boss health percentage to the 
+  # "BossPlayerList" (so not everyone on the server gets the message, only the participants. 
   - define BossStage <npc.flag[BossStage]||none>
   - define SpecialAttack '<npc.constant[Stage %BossStage% Special Attack]||null>'
   - narrate "<red>Boss Stage %BossStage% - Health <npc.health.percentage.as_int><&pc>" targets:<npc.flag[BossPlayerList].as_list||null>
 
-  # Flags the boss with the current stage special attack, used by the special attack tasks to run (or not if it's not relevant for that stage anymore).
+  # Flags the boss with the current stage special attack, used by the special attack tasks to run (or to stop running if it's 
+  # not relevant for that stage anymore).
   - flag npc "CurrentSpecialAttack:%SpecialAttack%"
 
-  # Each stage can also have a different effect play around/near the boss, this is checked here and applied with the "execute as_server" command.
-  # If there is no effect for this stage, it removes it with the "--play none" parameter below.
+  # Each stage can also have a different effect play around/near the boss, this is checked here and applied with the "execute 
+  # as_server" command. If there is no effect for this stage, it removes it with the "--play none" parameter below.
   - if flame|heart|smoke|ender|potbreak|explosion contains "<npc.constant[Stage %BossStage% Boss Aura]||none>" {
       - execute as_server "npc sel <npc.id>" silent
       - execute as_server "npc effect --play none" silent
@@ -759,41 +773,39 @@
         - execute as_server "npc effect --play none" silent }
 
   # The next section is where the minions are spawned, if enabled, for the relevant boss stage.
-  # For the "repeat" command, it runs the number of times based on the number of minions you've set to spawn in the "... Minion Quantity" constant 
-  # values  at the top for each stage.
+  # For the "repeat" command, it runs the number of times based on the number of minions you've set to spawn in the "... 
+  # Minion Quantity" constant values  at the top for each stage.
   #
-  # It uses a global flag (<bossname>Id) to store the boss's NPC ID which is then put into a for each of the minions - so it creates a relationship of 
-  # sorts between the boss & minions so they can be despawned when the boss dies for example.
+  # It uses a global flag (<bossname>Id) to store the boss's NPC ID which is then put into a for each of the minions - so it 
+  # creates a relationship between the boss & minions so they can be despawned when the boss dies, for example.
   #
-  # It checks to see where the minions should spawn based on your set spawn location, 'player', 'cuboid' or 'boss'. Then it uses a great tag 
-  # combination "get_spawnable_blocks.random" to pick a random "safe" location for the minion to spawn. This prevents *most* NPC's from spawning 
-  # inside walls.
+  # It checks to see where the minions should spawn based on your set spawn location, 'player', 'cuboid' or 'boss'. Then it 
+  # picks a random "safe" location for the minion to spawn. This prevents *most* NPC's from spawning inside walls.
   #
-  # Then, once its got the location it runs the "NewMoonBoss Spawn Minion" task instantly. This is explained further down when you get to the task.
+  # Then it runs the "NewMoonBoss Spawn Minion" task instantly. This is explained further down when you get to the task.
   #
-  # Once the minion has been created, it'll make it a baby if a) you enabled it  b) if the NPC type supports it. It then applies all the sentry values
-  # you've set at each stage in the constants at the top of the script. 
+  # Once the minion has been created, it'll make it a baby if a) you enabled it  b) if the NPC type supports it. It then 
+  # applies all the jsentry values you've set at each stage in the constants at the top of the script. 
 
-  # - if '<npc.constant[Stage %BossStage% Spawn Minions]>' == "Yes" && <npc.flag[MinionSpawnedStage]||none> != %BossStage% {
-    # - flag npc MinionSpawnedStage:%BossStage%
-    # - define MinionSpawn '<npc.constant[Minion %BossStage% Spawn Location]>'
-    # - if %MinionSpawn% == cuboid define cuboid <npc.flag[cuboid]>
-      # else if %MinionSpawn% == boss {
-        # - define location <npc.location.simple>
-        # - define cuboid <el@val[<l@%location%.add[l@-5,0,-5]>|<l@%location%.add[l@5,1,5]>].as_cuboid> 
-      # }
-    # - repeat '<npc.constant[Minion %BossStage% Quantity]>' {
-      # - if %MinionSpawn% == player {
-        # - define selplayer <npc.flag[BossPlayerList].as_list.random||null>
-        # - define location <player[%selplayer%].location.simple>
-        # - define cuboid <el@val[<l@%location%.add[l@-3,0,-3]>|<l@%location%.add[l@3,1,3]>].as_cuboid> }
-      # - flag npc SpawnLocation:<%cuboid%.get_spawnable_blocks.random>
-      # - run "NewMoonBoss Spawn Minion" instantly 
-    # }
-  # }
-
-  # Each stage can have a different special attack. This is where that process kicks off. First it checks what the attack is for the current
-  # stage, then flags the Boss with the "ActiveSpecialAttackStage" which is used by the special attack tasks to run or cancel further down.
+  - if '<npc.constant[Stage %BossStage% Spawn Minions]>' == "Yes" && <npc.flag[MinionSpawnedStage]||none> != %BossStage% {
+    - flag npc MinionSpawnedStage:%BossStage%
+    - define MinionSpawn '<npc.constant[Minion %BossStage% Spawn Location]>'
+    - if %MinionSpawn% == cuboid define cuboid <npc.flag[cuboid]>
+      else if %MinionSpawn% == boss {
+        - define location <npc.location.simple>
+        - define cuboid <el@val[<l@%location%.add[l@-5,0,-5]>|<l@%location%.add[l@5,1,5]>].as_cuboid> 
+      }
+    - repeat '<npc.constant[Minion %BossStage% Quantity]>' {
+      - if %MinionSpawn% == player {
+        - define selplayer <npc.flag[BossPlayerList].as_list.random||null>
+        - define location <player[%selplayer%].location.simple>
+        - define cuboid <el@val[<l@%location%.add[l@-3,0,-3]>|<l@%location%.add[l@3,1,3]>].as_cuboid> }
+      - flag npc SpawnLocation:<%cuboid%.get_spawnable_blocks.random>
+      - run "NewMoonBoss Spawn Minion" instantly 
+    }
+  }
+  # Each stage can have a different special attack. This is where that process starts. First it checks what the attack is for 
+  # the current fight stage, then flags the Boss with the "ActiveSpecialAttackStage" which is used by the special attack tasks # to run or cancel further down.
   - if "Poison Arrow|Wither Arrow|Weakness Arrow|Slowness Arrow" contains %SpecialAttack% {
     - flag npc ActiveSpecialAttackStage:Arrows
     - run "NewMoonBoss Special Attack - Arrows" 
@@ -804,7 +816,7 @@
       }
     else flag npc ActiveSpecialAttackStage:!
  
- #==========================================================================================================================================
+#===========================================================================================================
 "NewMoonBoss Spawn Minion":
     # NB this script is run by the boss; although after the creation of the minion, it gets a bit confused, so I saved/defined the BossID early on.
     type: task
@@ -829,13 +841,13 @@
     # Assign the "NewMoonBoss Minion Basics" script to each minion.
     - execute as_server "npc assign --set 'NewMoonBoss Minion Actions'" silent
     
- #====================================================================================================================
+#===========================================================================================================
 "NewMoonBoss Minion Actions":
   # this script is run by the Minions, on it being assigned to them, by the script above.  Therefore <npc> tags here refer to the Minion.
   type: assignment
   debug: false
   actions:
-  # -------------------------Minion 'on assignment'------------------------------------------------------------------------------------
+  # -------------------------Minion 'on assignment'---------------------------------------------------------
     on assignment:
     # first some triggers
     - trigger name:click state:true
@@ -844,16 +856,17 @@
     - define BossID <global.flag[NewMoonBossID]>
     - define BossStage <%BossID%.flag[BossStage]>
 
-    # Add NPC id to a global "AllMinions" list. This is checked by the boss on spawn to clean up any left behind NPC's if something went
-    # wrong or server shutdown midway through a fight.
+    # Add NPC id to a global "AllMinions" list. This is checked by the boss on spawn to clean up any left behind NPC's if 
+    # something went wrong or server shutdown midway through a fight.
     - flag global AllMinions:->:<npc>
 
-    # Flag the minion with the boss ID. This allows the minion to updates flags on the boss, e.g. the "BossPlayerList" or to add itself
-    # to the "AllMyMinions" list which is checked during by the Prevent Self Harm script. (now part of Items_and_world_scripts.)
+    # Flag the minion with the boss ID. This allows the minion to updates flags on the boss, e.g. the "BossPlayerList" or to 
+    # add itself to the "AllMyMinions" list which is checked during by the Prevent Self Harm script. (now part of 
+    # Items_and_world_scripts.)
     - flag npc MinionCreator:%BossID%
     
-    # In order to calculate damage correctly during the fight, the minion needs to be flagged with its own initial health.  This is easy to
-    # do here as we already have the needed def's set up.
+    # In order to calculate damage correctly during the fight, the minion needs to be flagged with its own initial health.  
+    # This is easy to do here as we already have the needed def's set up.
     - flag npc 'MaxHealth:<%BossID%.constant[Minion %BossStage% Health]>'
 
     # Minion adds itself into the boss's minion list flags.
@@ -862,7 +875,6 @@
     
     # now we setup the various config options for the minion, as defined in the constants, for the current BossStage.
     #- execute as_server "npc select <npc.id>" silent
-    - flag npc jsentry.is_jsentry
     - if '<%BossID%.constant[Minion %BossStage% Type]>' contains player {
       - adjust <npc> 'skin:<%BossID%.constant[Minion %BossStage% Skin]>' }
     - if '<%BossID%.constant[Minion %BossStage% Age]>' == baby {
@@ -872,6 +884,7 @@
     - adjust <npc> 'max_health:<%BossID%.constant[Minion %BossStage% Health]>'
     - adjust <npc> 'health:<%BossID%.constant[Minion %BossStage% Health]>'
     - trait state:true pushable
+    - flag npc jsentry.is_jsentry
     - flag npc 'jsentry.attackrate:<%BossID%.constant[Minion %BossStage% Attack Rate]>'
     - flag npc 'jsentry.walkspeed:<%BossID%.constant[Minion %BossStage% Speed]>'
     - flag npc 'jsentry.damage:<%BossID%.constant[Minion %BossStage% Strength]>'
@@ -885,45 +898,39 @@
       }
     - flag npc 'jsentry.targets:player'
 
-  #--------------------------Minion 'on death'-----------------------------------------------------------------------------------------
+  #--------------------------Minion 'on death'--------------------------------------------------------------
     on death:
-    # this section contains commands to be run whenever a Minion dies, for any reason.
+    # This section contains commands to be run whenever a Minion dies, for any reason.
     
     # Remove the minion from the "AllMinions" global flag (used to clean up if minions left behind for whatever reason).
     - flag global AllMinions:<-:<npc>
     # Remove the minion from the boss's minion list.
     - flag <npc.flag[MinionCreator]> AllMyMinions:<-:<npc>
     
-  #--------------------------Minion 'on death by player'-------------------------------------------------------------------------------
+  #--------------------------Minion 'on death by player'----------------------------------------------------
     on death by player:
     # This section contains commands to be run, in addition to the 'on death' commands, when a Minion is killed by a player.
-    
     - define Boss <npc.flag[MinionCreator]>
     # This adds 1 to a player flag keeping count of minions killed.
     - flag player <%Boss%.name>MinsKilled:++
     # If the scoreboard is set to record minions killed count, add one to the player score.
     - if <%Boss%.flag[Scoreboard]||null> == minionkills execute as_server "scoreboard players add <player.name> <%Boss%.name.substring[1,5]>.MinionKills 1" silent
-  #--------------------------Minion 'on click'-----------------------------------------------------------------------------------------
+  #--------------------------Minion 'on click'--------------------------------------------------------------
     on click:
     - run "Health Status Bar"
     
-  #--------------------------Minion 'on damaged'---------------------------------------------------------------------------------------
+  #--------------------------Minion 'on damaged'------------------------------------------------------------
     on damaged:
     # This script is very similar to the Boss's 'on damage' script, so comments will be limited.
     - wait 1t
     - if <context.damager> matches player {
       - define player <context.damager> 
       }
-      else if <server.has_flag[Arrow.<context.damager.as_entity.escaped>]> {
-        - define player <server.flag[Arrow.<context.damamger.as_entity.escaped>]>
-        }
       else determine cancelled
-      
     - if <npc.has_flag[DamageScriptActive]> determine cancelled else flag npc DamageScriptActive duration:1s
     - define Boss <npc.flag[MinionCreator]>
-    
     - if <def[Boss].is_spawned> {
-      - if <player.flag[PlayerBossList].as_list||li@> !contains <%Boss%> && <player.name> != <npc.name> flag player PlayerBossList:->:<%Boss%>
+      #- if <player.flag[PlayerBossList].as_list||li@> !contains <%Boss%> && <player.name> != <npc.name> flag player PlayerBossList:->:<%Boss%>
       - if <%Boss%.flag[BossPlayerList].as_list||li@> !contains %player% && %player% != %Boss% flag <%Boss%> BossPlayerList:->:%player% 
       - if <%Boss%.flag[BossHitList].as_list||li@> !contains %player% && %player% != %Boss% flag <%Boss%> BossHitList:->:%player% 
       
@@ -939,8 +946,7 @@
       }    
     - flag npc PreviousHealth:<npc.health> 
     - flag npc DamageScriptActive:! 
-
- #=====================================================================================================================================
+ #==========================================================================================================
 "NewMoonBoss Self Heal":
 
 # If you typed "Yes" in the  "Boss Self Healing" constant value,
