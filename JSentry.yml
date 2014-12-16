@@ -4,10 +4,10 @@
 # |
 # | Sentry rescripted in Denizen!
 #
-# @ Based on dSentry script from mcmonkey
-# @ bugs fixed, and improvements made by Jabelpeeps (many of which have been included in dSentry)
+# @ Based on dSentry script from mcmonkey, but optimised for use with Bossfight script.
+# @ Bugs fixed, and improvements made by Jabelpeeps (many of which have been included in dSentry)
 # @date 2014 / 12 / 08
-# @version 1.0
+# @version 1.1
 #
 # Installation:
 # Just copy this script to your Denizen/scripts folder, and do '/denizen reload scripts'
@@ -41,11 +41,13 @@ jsentry_world_handler:
             - yaml create id:jsentry_saves
             }
           }
-        # start jsentry_task_logic if it is not already running.
-        - foreach <queue.list> {
-          - if %value% contains jsentry_TASK_LOGIC queue clear
+        # stops previous jsentry_task_logic task, if it is already running, and starts a new one.
+        - define queues <queue.list.filter[starts_with[jsentry_task_logic]]>
+        - foreach %queues% {
+          - queue %value% stop
           }
-        - run jsentry_task_logic delay:10t
+        - wait 5s
+        - run s@jsentry_task_logic instantly
         
         # # uncomment this section to activate the health trait.
         # - foreach <server.get_npcs_flagged[dsentry.is_dsentry]> {
@@ -86,11 +88,11 @@ jsentry_world_handler:
         - if <npc.has_flag[jsentry.is_jsentry]> flag <context.entity> jsentry.target:<context.damager>
         
         # adjusts damage taken by dSentries according to their armour values (either configured or calculated)
-        on npc damaged:
+        on npc damaged by entity:
         - if !<context.entity.has_flag[jsentry.is_jsentry]> queue clear
-        - if 'entity_attack|projectile|thorns|entity_explosion|fire' !contains <context.cause> queue clear
+        - if <npc.flag[jsentry.targets].as_list> !contains <context.damager.entity_type> determine cancelled
         - define armour <proc[jsentry_proc_calculatearmour]> npc:<context.entity>
-        - determine <el@val[1].sub[%armour%].mul[<context.damage>]>
+        - determine <el@val[1].sub[%armour%].mul[<context.damage>].as_int>
         
         # adjusts damage dealt by dSentries to the value in jsentry.damage
         on npc damages entity:
@@ -461,7 +463,7 @@ jsentry_command:
     - yaml savefile:jsentry_saves.yml id:jsentry_saves
     - narrate "<&6>jsentry type saved!"
 
-  # Create command - converts an npc into a desentry, either using default config values, or loading them from named savefile.
+  # Create command - converts an npc into a dsentry, either using default config values, or loading them from named savefile.
     jsentry_command_create:
     - if <context.args.get[2].is[==].to[null]||true> {
       - flag %mynpc% jsentry.range:15
@@ -479,6 +481,7 @@ jsentry_command:
       # - flag %mynpc% jsentry.eventtargets:!
       - adjust %mynpc% teleport_on_stuck:true
       - flag %mynpc% jsentry.is_jsentry
+      - flag %mynpc% jsentry.logic_group_<server.get_npcs_flagged[jsentry.is_jsentry].size.mod[10]>
       - adjust %mynpc% teleport_on_stuck:false
       - narrate "<&6>NPC turned into a default jsentry."
       - queue clear
@@ -510,6 +513,7 @@ jsentry_command:
     # - flag %mynpc% jsentry.eventtargets:!
     # - flag %mynpc% jsentry.eventtargets:|:<yaml[jsentry_saves].read[%base%eventtargets]>
     - flag %mynpc% jsentry.is_jsentry
+    - flag %mynpc% jsentry.logic_group_<server.get_npcs_flagged[jsentry.is_jsentry].size.mod[10]>
     - narrate "<&6>NPC turned into a custom jsentry."
 
   # uncreate command - removes all jsentry flags from an npc; converting it back to a standard npc.
@@ -536,17 +540,14 @@ jsentry_task_logic:
     debug: false
     script:
     - while true {
-      - wait 10t
-      - foreach <server.get_npcs_flagged[jsentry.is_jsentry]> {
-        - if <def[value].is_spawned> {
+      - wait 1t
+      - foreach <server.get_spawned_npcs_flagged[jsentry.logic_group_<def[loop_index].mod[10]>]> {
           - run jsentry_task_attack npc:<def[value]> instantly
           - if <def[value].flag[jsentry.target]||null> == null {
             - resume waypoints npc:%value%
-            }
           }
         }
       }
-
 # Chooses a nearby target
 jsentry_proc_picktarget:
     type: procedure
@@ -555,7 +556,7 @@ jsentry_proc_picktarget:
     - if <npc.flag[jsentry.target]||null> != null {
       - if <npc.flag[jsentry.target].as_entity.is_spawned||false> {
         - if <npc.location.distance[<npc.flag[jsentry.target].as_entity.location>]> < <npc.flag[jsentry.range]> {
-          - if <npc.can_see[<npc.flag[dsentry.target]>]> {
+          - if <npc.can_see[<npc.flag[dsentry.target]||null>]||false> {
             - determine <npc.flag[jsentry.target]>
             }
           }
@@ -565,7 +566,7 @@ jsentry_proc_picktarget:
       # - announce to_console "<&6>NPC <npc.id> is marked as a jsentry but does not have a targets list!"
       # - queue clear
       # }
-    - define entities <npc.location.find.entities[<npc.flag[jsentry.targets].as_list>|player].within[<npc.flag[jsentry.range]>].exclude[<npc>]>
+    - define entities <npc.location.find.entities[<npc.flag[jsentry.targets].as_list||li@>|player].within[<npc.flag[jsentry.range]>].exclude[<npc>]>
     - define entity null
     - foreach %entities% {
       - if %value% matches npc {
@@ -581,9 +582,9 @@ jsentry_proc_picktarget:
             - define TEMP_PLAYER_PASS true
             }
           }
-        - if <def[playrar].gamemode> == CREATIVE {
-          - define TEMP_PLAYER_PASS false
-          }
+        # - if <def[playrar].gamemode> == CREATIVE {
+          # - define TEMP_PLAYER_PASS false
+          # }
         - if !%TEMP_PLAYER_PASS% {
           - define entities <def[entities].exclude[%playrar%]>
           }
@@ -606,40 +607,40 @@ jsentry_task_attack:
     debug: false
     script:
     # this section adds 10 to jsentry.attackping every time it is called by jsentry_task_logic (every 10 ticks).
-    - flag npc jsentry.attackping:<npc.flag[jsentry.attackping].add[10].asint||0>
+    - flag npc jsentry.attackping:<npc.flag[jsentry.attackping].add[10].as_int||0>
     - if <npc.flag[jsentry.attackping]> >= <npc.flag[jsentry.attackrate]> {
       - flag npc jsentry.attackping:0
       }
       else {
       - queue clear
       }
-    # call jsentry_proc_picktarget if there is no current target, the current target is not spawned, or is out of sight.
-    - if <npc.flag[jsentry.target]||null> == null {
-      - flag npc jsentry.target:<proc[jsentry_proc_picktarget]> 
-      }
-      else {
-      - if !<util.entity_is_spawned[<npc.flag[jsentry.target]>]||false> || !<npc.can_see[<npc.flag[jsentry.target]>]||false> {
-        - flag npc jsentry.target:<proc[jsentry_proc_picktarget]>
+      
+    - flag npc jsentry.target:<proc[jsentry_proc_picktarget]> 
+    
+    # # call jsentry_proc_picktarget if there is no current target; or if the current target is not spawned, is out of sight, or is out of range.
+    # - if <npc.flag[jsentry.target]||null> == null {
+      # - flag npc jsentry.target:<proc[jsentry_proc_picktarget]> 
+      # }
+      # else {
+      # - if !<util.entity_is_spawned[<npc.flag[jsentry.target]>]||false> 
+        # || !<npc.can_see[<npc.flag[jsentry.target]>]||false> 
+        # || <npc.location.distance[<npc.flag[jsentry.target].as_entity.location>]> < <npc.flag[jsentry.range]> 
+        # {
+        # - flag npc jsentry.target:<proc[jsentry_proc_picktarget]>
+        # }
+      # }
+      
+    # section handles the follow guard_target behaviour of JSentries who are guarding 
+    - if <npc.flag[jsentry.guard_target]||null> matches npc {
+      - if <npc.flag[jsentry.guard_target].as_npc.is_spawned||false> {
+        - inject locally Move_to_guard_target
         }
       }
-    # section handles the following behaviour of dSentries who are guarding 
-    - define valid false
-    - if <npc.flag[jsentry.guard_target]||null> matches player {
-      - if <npc.flag[jsentry.guard_target].as_player.is_online||false> define valid true
-      }
-      else if <npc.flag[jsentry.guard_target]||null> matches npc {
-        - if <npc.flag[jsentry.guard_target].as_npc.is_spawned||false> define valid true
-        }
-    - if %valid% {
-      - if <npc.location.distance[<npc.flag[jsentry.guard_target].as_entity.location>]> > 100 {
-        - teleport <npc> <npc.flag[jsentry.guard_target].as_entity.location>
-        }
-      - if <npc.flag[jsentry.target]||null> == null || <npc.item_in_hand.material.name> == bow {
-        - if <npc.location.distance[<npc.flag[jsentry.guard_target].as_entity.location>]> > <npc.flag[jsentry.follow_range]> {
-          - walk <npc> <npc.flag[jsentry.guard_target].as_entity.location> auto_range radius:<npc.flag[jsentry.follow_range]>
+      else if <npc.flag[jsentry.guard_target]||null> matches player {
+        - if <npc.flag[jsentry.guard_target].as_player.is_online||false> {
+          - inject locally Move_to_guard_target
           }
         }
-      }
     # end of guarding specific code
     - if <npc.flag[jsentry.target]||null> == null {
       - if <npc.entity_type> == player animate <npc> animation:stop_use_item
@@ -673,7 +674,15 @@ jsentry_task_attack:
           }
         }
       }
-
+    Move_to_guard_target:
+      - if <npc.location.distance[<npc.flag[jsentry.guard_target].as_entity.location>]> > 100 {
+        - teleport <npc> <npc.flag[jsentry.guard_target].as_entity.location>
+        }
+      - if <npc.flag[jsentry.target]||null> == null || <npc.item_in_hand.material.name> == bow {
+        - if <npc.location.distance[<npc.flag[jsentry.guard_target].as_entity.location>]> > <npc.flag[jsentry.follow_range]> {
+          - walk <npc> <npc.flag[jsentry.guard_target].as_entity.location> auto_range radius:<npc.flag[jsentry.follow_range]>
+          }
+        }
 jsentry_task_removearrow:
     type: task
     debug: false
@@ -689,10 +698,9 @@ jsentry_proc_calculatearmour:
       - determine <npc.flag[jsentry.armour]>
       }
     # section to calculate % damage reduction according to the material of worn armour.
-    - define TotalArmour 0
     - foreach helmet|chestplate|leggings|boots {
       - define material <npc.equipment.%value%.material.name.replace[_%value%]||air>
-      - define TotalArmour <def[TotalArmour].add[<s@jsentry_equipment_values.yaml_key[armour.%material%.%value%]>]>
+      - define TotalArmour <def[TotalArmour].add[<s@jsentry_equipment_values.yaml_key[armour.%material%.%value%]||0>]>
       }
     - determine <def[TotalArmour]>
     

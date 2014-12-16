@@ -444,15 +444,13 @@
     - run "Bloodsucker Despawn Timer" delay:60s
     
     on death:
-    - determine passively cancelled
     - flag <npc.owner> bsBatList:<-:<npc>
-    - remove <npc>
 
     on damage:
     - playsound location:<npc.location> sound:bat_idle
     
     on exit proximity:
-    - ^if <npc.owner.flag[bsTarget]> == <player> || <player> == <npc.owner> {
+    - if <npc.owner.flag[bsTarget]> == <player> || <player> == <npc.owner> {
       - flag <npc.owner> bsBatList:<-:<npc>
       - remove <npc> }
 
@@ -516,21 +514,21 @@
     # WARNING: This will allow players to get into protected buildings!!
     on player right clicks with i@PhaseShifter:
       - if !<player.has_flag[PhaseShifter_Cooldown]> {
-        - flag <player> "PhaseShifter_Cooldown" duration:3s
+        - flag <player> "PhaseShifter_Cooldown" duration:5s
         - if !<player.has_flag[PhaseShifter_Narrate_Cooldown]> {
           - random {
-            - narrate "<white><player.name.display><red> shimmers and disappears..." targets:<player.location.find.players.within[10]>
-            - narrate "<white><player.name.display><red> teleports to a nearby location..." targets:<player.location.find.players.within[10]>
-            - narrate "<white>With a puff of smoke, <white><player.name.display><red> teleports not too far away.." targets:<player.location.find.players.within[10]> }
+            - narrate "<white><player.name.display.replace[~]><red> shimmers and disappears..." targets:<player.location.find.players.within[10]>
+            - narrate "<white><player.name.display.replace[~]><red> teleports to a nearby location..." targets:<player.location.find.players.within[10]>
+            - narrate "<white>With a puff of smoke, <white><player.name.display.replace[~]><red> teleports not too far away.." targets:<player.location.find.players.within[10]> }
           }
         - flag <player> "PhaseShifter_Narrate_Cooldown" duration:20s
-        - playsound location:<player.location> sound:enderman_teleport
-        - playeffect location:<player.location> effect:large_smoke
+        - playsound <player.location> sound:enderman_teleport
+        - playeffect <player.location> effect:large_smoke
         - define location <player.location.simple>
         - define cuboid <el@val[<l@%location%.add[l@-20,-10,-20]>|<l@%location%.add[l@20,20,20]>].as_cuboid>
-        - teleport <player> location:<%cuboid%.get_spawnable_blocks.random>
-        - playsound location:<player.location> sound:enderman_teleport
-        - playeffect location:<player.location> effect:large_smoke }
+        - teleport <player> <%cuboid%.get_spawnable_blocks.random>
+        - playsound <player.location> sound:enderman_teleport
+        - playeffect <player.location> effect:large_smoke }
     
     # Foolsgold - modified from original (which displayed blocks) as mining is not enabled in our quest world.
     on player right clicks block with i@FoolsGold:
@@ -538,9 +536,9 @@
         - flag player "Fools_Gold_Cooldown" duration:60s
         - define location <player.location.cursor_on.range[10].simple>
         - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
-        - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
-        - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s
-        - displayitem i@emerald location:<%cuboid%.get_spawnable_blocks.random> duration:60s }
+        - displayitem i@emerald <%cuboid%.get_spawnable_blocks.random> duration:60s
+        - displayitem i@emerald <%cuboid%.get_spawnable_blocks.random> duration:60s
+        - displayitem i@emerald <%cuboid%.get_spawnable_blocks.random> duration:60s }
         else narrate "<white><player.flag[Fools_Gold_Cooldown].expiration.formatted><red> before you can use <white>Fool's Gold<red> again."  
           
     # Shoot fireballs in the direction of where the cursor is, they have "weight" so it gives a "bullet drop" effect.
@@ -561,7 +559,7 @@
    # Bow of Decay
     - if '<%hitter%.item_in_hand.scriptname.contains[Bow of Decay]>' {
       - cast wither duration:10 power:1 %victim%
-      - playsound location:<%victim%.location> sound:wither_death volume:2 pitch:0.01
+      - playsound <%victim%.location> sound:wither_death volume:2 pitch:0.01
       - if <%victim%.is_player> && "!<%victim%.has_flag[Hit by Bow of Decay]>" {
         - flag %victim% "Hit by Bow of Decay" duration:120s
         - narrate "<red>You feel your flesh peeling away...strange voices in your head..so much hate.." targets:%victim% }
@@ -574,63 +572,15 @@
         - narrate "<red>The eery twisted music of a deserted, foggy circus makes you turn...round and round..." targets:%victim% }
       - rotate %victim% duration:5s }
     
-   # ----------- Scripts for the hand held items ----------
-    on entity damaged by player:
-    # this section contains def's and a catch-all to immediately end script if weapon is vanilla.
-    - if '<context.damager.item_in_hand.scriptname||null>' == null queue clear
-    - define hitter <context.damager>
-    - define victim <context.entity>
-    
-   # first up - Hammer of the Gods   
-    - if '<%hitter%.item_in_hand.scriptname.contains[Hammer of the Gods]>' {
-      - if <%victim%.is_player> && '!<%victim%.has_flag[Hit by Gods Hammer]>'  {
-        - flag %victim% "Hit by Gods Hammer" duration:120s
-        - narrate "<red>The gods curse you... your end is near..." targets:%victim% }
-      - strike destination:<%victim%.location> 
-      - queue clear }
-      
-   # next is Lifestealer
-    - if '<%hitter%.item_in_hand.scriptname.contains[Lifestealer]>' {
-      - playsound location:<%victim%.location> sound:enderdragon_growl volume:0.4 pitch:0.01
-      - heal %hitter% 1
-      - hurt %victim% 1 
-      - queue clear }
-    
-   # now Bloodsucker
-    - if <%hitter%.item_in_hand.scriptname.contains[Bloodsucker]> {
-      - define location <%victim%.location.simple>
-      - if !<%hitter%.has_flag[bsCooldown]> && <%hitter%.flag[bsBatList].size||0> == 0 {
-        - flag %hitter% "bsCooldown" duration:10s
-        - flag %hitter% "bsTarget:%victim%"
-        - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
-        - foreach <%cuboid%.get_blocks[air].random[3]> {
-          - run instantly "Spawn Bloodsucker Bat" def:%value%|%hitter% }
-        - foreach <%hitter%.flag[bsBatList].as_list> {
-          - attack %value% target:%victim% }
-        - queue clear }
-        
-      - if <%hitter%.flag[bsBatList].size||0> >= 1 && <%hitter%.flag[bsBatList].as_list||li@> !contains %victim% {
-        - flag %hitter% "bsTarget:%victim%"
-        - foreach <%hitter%.flag[bsBatList].as_list> {
-          - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
-          - playeffect location:<%cuboid%.get_blocks[air].random> effect:large_smoke
-          - define cuboid <el@val[<l@%location%.add[l@-2,-1,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
-          - teleport %value% location:<%cuboid%.get_blocks[air].random> 
-          - attack %value% target:%victim% }
-        - queue clear }
-      } 
-   # and finally the PTD (personal teleportation device) - first a line to cancel damage, and then events for right and left clicks
-    - if '<%hitter%.item_in_hand.scriptname.contains[PTD]>' determine cancelled
-    
     on player right clicks with i@PTD:
-    - if "<player.has_flag[PTD Locations]>" {
-      - playsound location:<player.location> sound:enderman_teleport
-      - playeffect location:<player.location> effect:large_smoke
+    - if '<player.has_flag[PTD Locations]>' {
+      - playsound <player.location> sound:enderman_teleport
+      - playeffect <player.location> effect:large_smoke
       - narrate "<red>Teleporting to Saved Location [<yellow><player.flag[PTD Locations].size><red>]<&co><white> <player.flag[PTD Locations].get[<player.flag[PTD Locations].size>]>"
-      - teleport <player> "location:<player.flag[PTD Locations].get[<player.flag[PTD Locations].size>]>"
-      - flag <player> "PTD Locations[<player.flag[PTD Locations].size>]:<-"
-      - playsound location:<player.location> sound:enderman_teleport
-      - playeffect location:<player.location> effect:large_smoke }
+      - teleport <player> '<player.flag[PTD Locations].get[<player.flag[PTD Locations].size>]>'
+      - flag <player> 'PTD Locations[<player.flag[PTD Locations].size>]:<-'
+      - playsound <player.location> sound:enderman_teleport
+      - playeffect <player.location> effect:large_smoke }
       
       else narrate "<red>You have no coordinates loaded in your PTD..."
 
@@ -664,17 +614,55 @@
         - remove %value% }
       - flag <player> bsBatList:!
       }
+  # ----------- Scripts for the hand held items ----------
+    on entity damaged by player:
+    - if 'Hammer of the Gods|Lifestealer|Bloodsucker|PTD' !contains <context.damager.item_in_hand.scriptname||null> {
+      - queue clear
+    }    
+    - inject locally '<context.damager.item_in_hand.scriptname||null> hand-held effects' 
+
+  'Hammer of the Gods hand-held effects':
+      - if <context.entity.is_player> && '!<context.entity.has_flag[Hit by Gods Hammer]>'  {
+        - flag <context.entity> "Hit by Gods Hammer" duration:60s
+        - narrate "<red>The gods curse you... your end is near..." targets:<context.entity> 
+      }
+      - strike destination:<context.entity.location> 
+   
+  'Lifestealer hand-held effects':
+      - playsound location:<context.entity.location> sound:enderdragon_growl volume:0.4 pitch:0.01
+      - heal <context.damager> 1
+      - hurt <context.entity> 1
+      
+  'Bloodsucker hand-held effects':
+      - define location <context.entity.location.simple>
+      - if !<context.damager.has_flag[bsCooldown]> && <context.damager.flag[bsBatList].size||0> == 0 {
+        - flag <context.damager> bsCooldown duration:10s
+        - flag <context.damager> bsTarget:<context.entity>
+        - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
+        - foreach <%cuboid%.get_blocks[air].random[3]> {
+          - run instantly "Spawn Bloodsucker Bat" 'def:%value%|<context.damager>' }
+        - foreach <context.damager.flag[bsBatList].as_list> {
+          - attack %value% target:<context.entity> }
+        - queue clear
+      }
+      - if <context.damager.flag[bsBatList].size||0> >= 1 && <context.damager.flag[bsBatList].as_list||li@> !contains <context.entity> {
+        - flag <context.damager> bsTarget:<context.entity>
+        - foreach <context.damager.flag[bsBatList].as_list> {
+          - define cuboid <el@val[<l@%location%.add[l@-2,0,-2]>|<l@%location%.add[l@2,2,2]>].as_cuboid>
+          - playeffect <%cuboid%.get_blocks[air].random> effect:large_smoke
+          - define cuboid <el@val[<l@%location%.add[l@-2,-1,-2]>|<l@%location%.add[l@2,1,2]>].as_cuboid>
+          - teleport %value% <%cuboid%.get_blocks[air].random> 
+          - attack %value% target:<context.entity> }
+        - queue clear 
+      }
+  'PTD hand-held effects': 
+      - determine cancelled
+      
 #=====================================================================================================================================
 "Bossfight Utility World Scripts":
   type: world
   debug: false
   events:
-    # # This section is to help ensure that damage from projectiles is correctly accounted for in the totals for bosses and minions.
-    # on player shoots bow:
-      # - if !<context.entity.has_flag[PlayerBossList]> queue clear
-      # - flag global 'Arrow.<context.projectile.as_entity.escaped>:<context.entity>' duration:3s
-    
-    
     # This section is relevant if the boss drop uses the "playerchest" method. It controls who can access the contents of the chest. If the player flag 
     # "LootChestLocation" does not match the location of the chest it uses "determine cancelled" to prevent the inventory window from showing up.
     on player opens chest:
