@@ -132,7 +132,7 @@
     # (set to -1 for armour to be calculated from worn armour)
     Boss Armour: 40
     # The range at which the boss will select targets to attack and/or loose track of current targets.
-    Boss Attack Range: 20
+    Boss Attack Range: 15
     # The speed at which the boss moves when attacking.
     Boss Movement Speed: 1
     # The number of ticks between attacks (has to be a multiple of 10)
@@ -141,11 +141,11 @@
     # If all players have left the boss proximity, this enables the boss to heal itself slowly.
     Boss Self Healing: "Yes"
 
-    # Set the location where your boss will respawn
+    # Set the location where your boss will spawn
     Boss Spawn Location: "259,107,449,frozen_spring"
 
     # Set to -1 if you never want the boss to respawn and be permanently destroyed on death. 
-    Boss Respawn Delay: 600
+    # Boss Respawn Delay: 600
 
     # Boss fight will reset after the configured number of seconds of inactivity. 
     # Set to 0 if you don't ever want it to reset and allow players to come back later to finish it.
@@ -178,15 +178,16 @@
 
     # The cuboid is the square area (a room) where most of the fighting will take place. This area can be used in the options below
     # to allow mobs to be spawned in it or to have some of the boss special fighting skills to take place in. 
-    Cuboid Spawn Area Poss 1: "219,102,403,frozen_spring"
-    Cuboid Spawn Area Poss 2: "304,112,477,frozen_spring"
+    Cuboid Spawn Area Poss 1: "221,102,405,frozen_spring"
+    Cuboid Spawn Area Poss 2: "302,112,475,frozen_spring"
 
     # What will trigger the start of the boss fight? 
     # proximity  (Activate if a player walks into the proximity specified in the "Boss Awareness Range" constant value below)
     # damage     (Activate boss fight when damaged by a player)
     Bossfight Activator: proximity 
     # Awareness range is the distance used to trigger the fight if 'proxmity' is selected above, and is separate from the 
-    # attack range specified further up. This is also the range in which special attacks will be triggered, and - when empty # of players - will trigger the boss's self-healing and reset timer.
+    # attack range specified further up. This is also the range in which special attacks will be triggered, and - when empty 
+    # of players - will trigger the boss's self-healing and reset timer.
     Boss Awareness Range: 55
 
     # Currently the script supports 4 battle stages, as currently written. A stage is reached/unlocked when the boss is down 
@@ -260,7 +261,7 @@
     # none                  (no effect)
     Minion One Spawn Effect: lightning
 
-    # player: spawn around random player
+    # player: spawn around random players
     # boss: spawn around boss
     # cuboid: spawn anywhere inside the cuboid values you specified above
     Minion One Spawn Location: cuboid
@@ -703,10 +704,10 @@
  
  #--------------------------Boss 'on push'------------------------------------------------------------------
     on push:
-    - if '<npc.location.distance[<npc.constant[Boss Spawn Location]>]>' > '<npc.constant[Boss Attack Range]>' {
+    - if '<npc.location.distance[<npc.constant[Boss Spawn Location]>]>' > '<npc.constant[Boss Attack Range].add[5]>' {
       - flag npc jsentry.target:!
       - flag npc jsentry.targets:!
-      - anchor id:BossSpawn walknear r:10
+      - anchor id:BossSpawn walknear r:4
       - flag npc jsentry.targets:player
       }
       

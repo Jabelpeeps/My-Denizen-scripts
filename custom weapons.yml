@@ -1,0 +1,967 @@
+﻿"Judgement Card":
+   type: item
+   material: diamond_sword
+   display name: "Judgement Card"
+   lore:
+   - Summons a bolt from above to smite
+   - your foes.
+   - Level - OU
+   enchantments:
+   - durability:5
+   - damage_all:2
+   recipe: 
+
+"Viceroy":
+   type: item
+   material: diamond_sword
+   display name: "<&6>Viceroy"
+   lore:
+   - The blade bends to the user's will.
+   - It's true power is unknown.
+   - Level - UU
+   enchantments:
+   - durability:5
+   - knockback:5
+   recipe:
+
+"Monarch":
+   type: item
+   material: iron_sword
+   display name: "<&4>Monarch"
+   lore:
+   - The blade bends to the user's will.
+   - It's true power is unfathomable.
+   - <&4>Right-click in battle to toggle power
+   - Level - OU
+   enchantments:
+   - durability:5
+   - damage_all:5
+   recipe:
+
+"Kirisute Gomen":
+   type: item
+   material: diamond_sword
+   display name: "Kirisute Gomen"
+   lore:
+   - Bring their heads!
+   - Level - OU
+   enchantments:
+   - damage_all:5
+   recipe:
+
+"Megidolaon":
+   type: item
+   material: diamond_sword
+   display name: "Megidolaon"
+   lore:
+   - The energy of an almighty force 
+   - strikes behind every blow...
+   - You can feel this immense power 
+   - wither you away as you fight.
+   - Level - Uber
+   enchantments:
+   - durability:10
+   - damage_all:10
+   recipe: 
+
+"Cobra Strike":
+   type: item
+   material: iron_sword
+   display name: "Cobra Strike"
+   lore:
+   enchantments:
+   - damage_all:1
+   - Level - UU
+   recipe: 
+
+"Giga Drain":
+   type: item
+   material: stone_sword
+   display name: "Giga Drain"
+   lore:
+   - Level - RU
+   enchantments:
+   - durability:1
+   recipe: 
+
+
+"Bludgeon":
+   type: item
+   material: wood_sword
+   display name: "Bludgeon"
+   lore:
+   - Level - RU
+   enchantments:
+   - damage_all:2
+   - knockback:2
+   recipe: 
+
+"Zampakutou":
+   type: item
+   material: iron_sword
+   display name: "<&8>Zampakutou"
+   lore:
+   - Sword of the Shinigami
+   - <&4>Right Click in a fight
+   - <&4>to release your Bankai!
+   - Level - OU
+   enchantments:
+   - damage_all:5
+   - durability:5
+   recipe:
+
+"Katana":
+   type: item
+   material: iron_sword
+   display name: "Katana"
+   lore:
+   - Sword of the Ninja
+   - Level - OU
+   enchantments:
+   - damage_all:5
+   - loot_bonus_mobs:5
+   recipe:
+
+"Lifebane":
+   type: item
+   material: stone_sword
+   display name: "Lifebane"
+   lore:
+   - Level - RU
+   enchantments:
+   recipe: 
+
+"Netherward":
+   type: item
+   material: gold_sword
+   display name: "Netherward"
+   lore:
+   - Level - RU
+   enchantments:
+   recipe:
+
+"Flash Freeze":
+   type: item
+   material: diamond_axe
+   display name: "<&6>F<&3>lash <&6>F<&3>reeze"
+   lore:
+   - Level - OU
+   enchantments:
+   - fire_aspect:4
+   - damage_all:4
+   - durability:4
+   recipe: 
+
+"Zap Cannon":
+   type: item
+   material: bow
+   display name: "Zap Cannon"
+   lore:
+   - Electricity courses through you, as a
+   - bolt of lighting falls upon the enemy.
+   - Level - Uber
+   enchantments:
+   - arrow_damage:10
+   - durability:10
+   recipe: 
+
+"Mazionga":
+   type: item
+   material: bow
+   display name: "<&e>Mazionga"
+   lore:
+   - <&e>Electricity Element
+   - WARNING: HIGH VOLTAGE
+   - Level - Uber
+   enchantments:
+   - arrow_damage:5
+   - durability:5
+   recipe: 
+
+
+"Maragion":
+   type: item
+   material: bow
+   display name: "<&c>Maragion"
+   lore:
+   - <&c>Fire Element
+   - The fire shall consume all
+   - Level - Uber
+   enchantments:
+   - arrow_damage:5
+   - arrow_fire:5
+   - durability:5
+   recipe: 
+
+
+"Mabufula":
+   type: item
+   material: bow
+   display name: "<&3>Mabufula"
+   lore:
+   - <&3>Ice Element
+   - Freeze enemies on the spot
+   - Level - Uber
+   enchantments:
+   - arrow_damage:5
+   - durability:5
+   recipe: 
+
+
+"Magarula":
+   type: item
+   material: bow
+   display name: "<&2>Magarula"
+   lore:
+   - <&2>Wind Element
+   - Blast enemies away in a whirlwind
+   - Level - Uber
+   enchantments:
+   - arrow_damage:5
+   - arrow_knockback:10
+   - durability:5
+   recipe:
+
+"Ziodyne":
+   type: item
+   material: bow
+   display name: "Ziodyne"
+   lore:
+   - <&e>Electricity Element
+   - WARNING: HIGH VOLTAGE
+   - Level - OU
+   enchantments:
+   - arrow_damage:5
+   recipe: 
+
+
+"Agidyne":
+   type: item
+   material: bow
+   display name: "Agidyne"
+   lore:
+   - <&c>Fire Element
+   - The fire shall consume all
+   - Level - Uber
+   enchantments:
+   - arrow_damage:5
+   - arrow_fire:5
+   recipe: 
+
+
+"Bufudyne":
+   type: item
+   material: bow
+   display name: "Bufudyne"
+   lore:
+   - <&3>Ice Element
+   - Freeze enemies on the spot
+   - Level - OU
+   enchantments:
+   - arrow_damage:5
+   recipe: 
+
+
+"Garudyne":
+   type: item
+   material: bow
+   display name: "Garudyne"
+   lore:
+   - <&2>Wind Element
+   - Blast enemies away in a whirlwind
+   - Level - OU
+   enchantments:
+   - arrow_damage:5
+   - arrow_knockback:10
+   recipe: 
+
+"Nix":
+   type: item
+   material: bow
+   display name: "Nix"
+   lore:
+   - Level - RU
+   enchantments:
+   - arrow_damage:1
+   recipe: 
+
+
+"Concussion":
+   type: item
+   material: bow
+   display name: "Concussion"
+   lore:
+   - Level - RU
+   enchantments:
+   - durability:1
+   recipe: 
+
+"Hama":
+   type: item
+   material: bow
+   display name: "<&f>Hama"
+   lore:
+   - The pure light that pierces
+   - the darkness.
+   - Level - Uber
+   enchantments:
+   - durability:10
+   recipe: 
+
+"Mudo":
+   type: item
+   material: bow
+   display name: "<&8>Mudo"
+   lore:
+   - The ominous darkness that
+   - swallows all light.
+   - Level - Banned from Uber
+   enchantments:
+   - durability:10
+   recipe: 
+
+"Snowballistic":
+   type: item
+   material: bow
+   display name: "<&b>Snowballistic"
+   lore:
+   - <&3>Ice Element
+   - Beyond cold
+   - Level - OU
+   enchantments:
+   - arrow_damage:3
+   - durability:3
+   - arrow_infinite:1
+   recipe: 
+
+"Kurai":
+   type: item
+   material: charcoal
+   display name: "<&8>Kurai"
+   lore:
+   - Spell of Darkness
+   - Level - OU
+   enchantments:
+   - damage_all:10
+   recipe: 
+
+"Jundo":
+   type: item
+   material: bone_meal
+   display name: "<&f>Jundo"
+   lore:
+   - Spell of Purity
+   - Level - OU
+   enchantments:
+   - damage_all:5
+   - fire_aspect:5
+   recipe: 
+
+"Death Note":
+   type: item
+   material: book
+   display name: "<&0>Death Note"
+   lore:
+   - He whose name is written in this note shall die
+   - Level - Banned from Uber
+   enchantments:
+   - damage_all:2
+   recipe: 
+
+"Summon Yatagarasu":
+   type: item
+   material: apple
+   display name: "<&2>Summon Yatagarasu"
+   lore:
+   - Contains Yatagarasu-no-Okami
+   recipe: 
+
+"Summon Hermit":
+   type: item
+   material: bread
+   display name: "<&6>Summon Hermit"
+   lore:
+   - Contains Hermit Amyntikos
+   recipe: 
+
+"Summon Leviathan":
+   type: item
+   material: 349
+   display name: "<&c>Summon Leviathan"
+   lore:
+   - Contains Magatsu Leviathan
+   recipe: 
+
+"Summon Guardian":
+   type: item
+   material: potato_item
+   display name: "<&1>Summon Guardian"
+   lore:
+   - Contains Guardian Genesis
+   recipe: 
+
+"Enigma Fruit":
+   type: item
+   material: melon
+   display name: "<&5>Enigma Fruit"
+   lore:
+   - <&d>A fruit of unknown origin
+   recipe:
+
+"Vector Carrot":
+   type: item
+   material: carrot_item
+   display name: "Vector Carrot"
+   lore:
+   - An odd carrot
+   recipe:
+
+"Infinite Cookie":
+   type: item
+   material: cookie
+   display name: "<&6>Infinite Cookie"
+   lore:
+   - Did someone say... cookies?
+   recipe:
+
+"Shackle Regalias":
+   type: item
+   material: leather_chestplate
+   display name: "Shackle Regalias"
+   lore:
+   - Level - OU
+   enchantments:
+   - protection_environmental:5
+   recipe:
+
+"Scourge Regalias":
+   type: item
+   material: iron_chestplate
+   display name: "Scourge Regalias"
+   lore:
+   - Level - OU
+   enchantments:
+   - protection_environmental:5
+   recipe:
+
+"OMC":
+   type: item
+   material: leather_chestplate
+   display name: "<&d>Overly Manly Chestpiece"
+   lore:
+   - Power, at the price of your dignity
+   - Level - OU
+   enchantments:
+   - protection_environmental:5
+   - durability:5
+   recipe:
+
+"Carapace":
+   type: item
+   material: iron_chestplate
+   display name: "Carapace"
+   lore:
+   enchantments:
+   - protection_environmental:5
+   - protection_fire:5
+   - durability:5
+   recipe:
+
+"Blizzaro":
+   type: item
+   material: diamond_chestplate
+   display name: "<&1>Blizzaro"
+   lore:
+   - A chestpiece of unmelting ice
+   - that binds to the user's body.
+   - Removing this armour will severely
+   - weaken the user.
+   - Level - Uber
+   enchantments:
+   - protection_environmental:10
+   - protection_fire:10
+   recipe:
+
+"Shadow Tag":
+   type: item
+   material: leather_helmet
+   display name: "<&8>Shadow Tag"
+   lore:
+   - Share the darkness
+   - Level - OU
+   enchantments:
+   - protection_environmental:5
+   - durability:5
+   recipe:
+
+
+# ==============================================================================
+"Scripted Weapons":
+  type: world
+  debug: false
+  events:
+    on entity damaged by player:
+    - if 'Judgement Card|Megidolaon|Cobra Strike|Katana|Bludgeon|Giga Drain|Lifebane|Netherward|Flash Freeze|Kurai|Death Note|Viceroy|Monarch|Jundo' !contains <context.damager.item_in_hand.scriptname||null> {
+      - queue clear
+    }
+    - inject locally '<context.damager.item_in_hand.scriptname> hand-held effects' 
+    
+    on entity damaged by arrow:
+    - if 'Zap Cannon|Ziodyne|Mazionga|Bufudyne|Mabufula|Agidyne|Maragion|Garudyne|Magarula|Nix|Concussion|Hama|Mudo|Snowballistic' !contains <context.damager.item_in_hand.scriptname||null> || !<context.damager.is_player> {
+      - queue clear
+    }
+    - inject locally '<context.damager.item_in_hand.scriptname> bow effects' 
+    
+    on player changes food level:
+    - if 'Summon Yatagarasu|Summon Hermit|Summon Leviathan|Summon Guardian|Enigma Fruit|Vector Carrot|Infinite Cookie' !contains <player.item_in_hand.scriptname||null> {
+      - queue clear
+    }
+    - inject locally '<player.item_in_hand.scriptname> food effects' 
+    
+    on player unequips chestplate:
+    - if 'Shackle Regalias|Scourge Regalias|Blizzaro|Carapace|OMC' !contains <context.armor.scriptname||null> {
+      - queue clear
+    }
+    - inject locally '<context.armor.scriptname> unequip chestplate effects'
+    
+    # on player unequips helmet:
+    # - if 'Shadow Tag' !contains <context.armor.scriptname||null> {
+      # - queue clear
+    # }
+    # - inject locally '<context.armor.scriptname> unequip helmet effects'
+
+    on player equips chestplate:
+    - if '<context.armor.scriptname.contains[Carapace]||false>'{
+      - cast slow duration:300d power:2 <player>
+      - cast damage_resistance duration:300d power:2 <player>
+    }
+    - if '<context.armor.scriptname.contains[OMC]||false>'{
+      - cast damage_resistance duration:300d power:2 <player>
+      - flag player "Wearing OMC:True"
+      - playeffect location:<context.entity.location> effect:fireworks_spark qty:16
+    }
+    #on player equips helmet:
+    #- if '<context.armor.scriptname.contains[Shadow Tag]||false>'{
+      #- cast blindness duration:300d power:2 <player>
+      #- flag player "Shadow Tag:Blind"
+    #}
+    #on entity damaged by player:
+    #- if '<player.flag[Shadow Tag]>' == 'Blind'{
+      #- cast blindness duration:300d power:2 <context.entity>
+      #- cast blindness remove <context.damager>
+      #- flag player "Shadow Tag:Null"
+      #- flag <context.entity> "Shadow Tag:Blind"
+    #}
+  # ----- Kirisute Gomen ------------- (NB, changed from 'entity kills entity')---
+    on player kills player:
+    - if '<context.damager.item_in_hand.scriptname.contains[Kirisute Gomen]||false>' {
+      - if '!<context.entity.has_flag[Hit by Kirisute Gomen]||null>' {
+        - flag <context.entity> "Hit by Kirisute Gomen" duration:120s 
+        - give i@SKULL_ITEM <context.damager.inventory>
+      }
+    }
+  # ----- Zampakutou --------------------
+    on player right clicks entity:
+    - if '<player.item_in_hand.scriptname.contains[Zampakutou]||false>' { 
+      - if '!<player.has_flag[Has used Zampakutou]||null>' {
+        - flag player "Has used Zampakutou" duration:240s    
+        - announce "<&7>[Weapon]<&8>Zampakutou:<&7> <player.name.display.replace[~]> has unleashed the power of their Bankai!"
+        - playeffect location:<player.location> effect:enchantment_table qty:250
+        - cast increase_damage duration:120 power:2 <player>
+        - cast speed duration:120 power:2 <player>
+        - wait 80
+        - narrate targets:<player> "<&8>The Hollow inside of you grows restless..."
+        - wait 40
+        - narrate targets:<player> "<&8>The Hollow inside of you has begun its attack!"
+        - cast wither duration:120 power:2 <player>
+        - cast weakness duration:120 power:2 <player>
+        - cast blindness duration:120 power:2 <player>
+        }
+        else {
+        - narrate "<&7>[Weapon]<&8>Zampakutou:<&7>Recharging..."
+        }
+      - queue clear
+    }
+  # ----- Monarch --------------------
+    - if '<player.item_in_hand.scriptname.contains[Monarch]||false>' { 
+      - if '!<player.has_flag[Has used Monarch]||null>' {
+        - flag player "Has used Monarch" duration:2s
+        - if '!<player.has_flag[Monarch Setting]>'{
+          - flag player "Monarch Setting:Void"
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Sudden Death'{
+          - flag player "Monarch Setting:Void"
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Dark'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Sudden Death Mode, Activate!"
+          - flag player "Monarch Setting:Sudden Death"
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Whirlwind'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Dark Mode, Activate!"
+          - flag player "Monarch Setting:Dark"
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Fire'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Whirlwind Mode, Activate!"
+          - flag player "Monarch Setting:Whirlwind"
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Ice'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Fire Mode, Activate!"
+          - flag player "Monarch Setting:Fire"
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Wither'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Ice Mode, Activate!"
+          - flag player "Monarch Setting:Ice"
+        }
+         - if '<player.flag[Monarch Setting]>' == 'Thunder'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Wither Mode, Activate!"
+          - flag player "Monarch Setting:Wither"
+        }
+         - if '<player.flag[Monarch Setting]>' == 'Poison'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Thunder Mode, Activate!"
+          - flag player "Monarch Setting:Thunder"
+        }
+         - if '<player.flag[Monarch Setting]>' == 'Void'{
+          - narrate "<&7>[Weapon]<&4>Monarch:<&7> Poison Mode, Activate!"
+          - flag player "Monarch Setting:Poison"
+        }
+      }
+    }
+  # ------ Hand-held special items -----------------
+  'Judgement Card hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Judgement Card]||null>' {
+        - flag <context.entity> "Hit by Judgement Card" duration:120s 
+        - strike location:<context.entity.location> 
+      }
+  'Megidolaon hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Megidolaon]||null>' {
+        - flag <context.entity> "Hit by Megidolaon" duration:120s 
+        - cast wither duration:10 power:0 <context.damager>
+        - cast wither duration:10 power:0 <context.entity>
+        - strike location:<context.entity.location>
+        - playsound location:<context.entity.location> sound:wither_spawn volume:1 pitch:2 
+      }
+  'Cobra Strike hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Cobra Strike]||null>' {
+        - flag <context.entity> "Hit by Cobra Strike" duration:10s 
+        - cast poison duration:10 power:1 <context.entity> 
+      }
+  'Katana hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Katana]||null>' {
+        - flag context.entity "Hit by Katana" duration:5s 
+        - cast speed duration:10 power:3 <context.damager> 
+      }
+  'Bludgeon hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Bludgeon]||null>' {
+        - flag <context.entity> "Hit by Bludgeon" duration:15s 
+        - cast nausea duration:15 power:1 <context.entity> 
+      }
+  'Giga Drain hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Giga Drain]||null>' {
+        - flag <context.entity> "Hit by Giga Drain" duration:100s 
+        - cast weakness duration:10 power:1 <context.entity>
+        - cast heal duration:1 power:0 <context.damager> 
+      }
+  'Lifebane hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Lifebane]||null>' {
+        - flag <context.entity> "Hit by Lifebane" duration:10s 
+        - cast wither duration:10 power:1 <context.entity>
+        - cast strength duration:2 power:0 <context.damager> 
+      }
+  'Netherward hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Netherward]||null>' {
+        - flag <context.entity> "Hit by Netherward" duration:10s 
+        - cast confusion duration:10 power:1 <context.entity>
+        - cast blindness duration:10 power:0 <context.entity> 
+      }
+  'Flash Freeze hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Flash Freeze]||null>' {
+        - flag <context.entity> "Hit by Flash Freeze" duration:10s 
+        - cast slowness duration:10 power:10 <context.entity>
+        - playeffect <context.entity.location> effect:snow_shovel qty:90 
+        - playeffect <context.entity.location> effect:lava qty:30 
+      }
+  'Kurai hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Kurai]||null>' {
+        - flag <context.entity> "Hit by Kurai" duration:30s 
+        - playeffect location:<context.entity.location> effect:smoke qty:30 
+        - cast blindness duration:10 power:4 <context.entity> 
+      }
+  'Death Note hand-held effects':
+      - if <context.entity.is_player> && '!<context.entity.has_flag[Hit by Death Note]||null>' {
+        - flag <context.entity> "Hit by Death Note" duration:86400s 
+        - playeffect location:<context.entity.location> effect:smoke qty:30 
+        - announce "<&c><context.entity.name.display.replace[~]>'s name has been written in the Death Note!"
+        - wait 40
+        - cast harm duration:10 power:10 <context.entity> 
+      }
+  'Viceroy hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Viceroy]||null>' {
+        - flag <context.entity> "Hit by Viceroy" duration:10s 
+        - playeffect location:<context.entity.location> effect:red_dust qty:90  
+        - random {
+          - strike location:<context.entity.location>
+          - cast harm duration:10 power:10 <context.entity>
+          - cast poison duration:10 power:3 <context.entity>
+          - cast blindness duration:10 power:3 <context.entity>
+          - cast confusion duration:10 power:3 <context.entity>
+          - cast slow duration:10 power:3 <context.entity>
+          - cast wither duration:10 power:3 <context.entity>
+          - cast hunger duration:10 power:3 <context.entity>
+          - cast weakness duration:10 power:3 <context.entity> 
+        }
+  'Monarch hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Monarch]||false>' {
+        - flag <context.entity> "Hit by Monarch" duration:10s
+        - if '<player.flag[Monarch Setting]>' == 'Sudden Death'{
+          - cast harm duration:10 power:10 <context.entity>
+          - cast wither duration:10 power:3 <context.damager>
+          - playeffect location:<context.entity.location> effect:drip_lava qty:600
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Dark'{
+          - cast blindness duration:10 <context.entity>
+          - playeffect location:<context.entity.location> effect:large_smoke qty:90
+          - playeffect location:<context.entity.location> effect:instant_spell qty:10
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Whirlwind'{
+          - rotate <context.entity> duration:5s
+          - playeffect location:<context.entity.location> effect:happy_villager qty:90
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Fire'{
+          - explode power:1 location:<context.entity.location>
+          - playeffect location:<context.entity.location> effect:lava qty:90
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Ice'{
+          - cast slow duration:10 power:4 <context.entity>
+          - playeffect location:<context.entity.location> effect:snow_shovel qty:90
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Wither'{
+          - cast wither duration:10 power:1 <context.entity>
+          - playeffect location:<context.entity.location> effect:red_dust qty:90
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Thunder'{
+          - strike location:<context.entity.location>
+          - playeffect location:<context.entity.location> effect:smoke qty:90
+        }
+        - if '<player.flag[Monarch Setting]>' == 'Poison'{
+          - cast poison duration:10 power:4 <context.entity>
+          - playeffect location:<context.entity.location> effect:witch_magic qty:90
+        }
+      }    
+  'Jundo hand-held effects':
+      - if '!<context.entity.has_flag[Hit by Jundo]||false>' {
+        - flag <context.entity> "Hit by Jundo" duration:30s 
+        - playeffect <context.entity.location> effect:lava qty:30
+        - execute as_server "effect <context.entity.name> clear" silent
+      }
+  # ------ Special Bows ----------------------------
+  'Zap Cannon bow effects':
+      - if '!<context.entity.has_flag[Hit by Zap Cannon]||false>' {
+        - flag <context.entity> "Hit by Zap Cannon" duration:30s 
+        - strike location:<context.entity.location>
+        - cast slow duration:10 power:5 <context.damager>
+        - cast slow duration:10 power:5 <context.entity>  
+        - playeffect location:<context.damager.location> effect:large_smoke qty:30
+      } 
+  'Ziodyne bow effects':
+      - if '!<context.entity.has_flag[Hit by Ziodyne]||false>' {
+        - flag <context.entity> "Hit by Ziodyne" duration:10s 
+        - strike location:<context.entity.location> 
+      }
+  'Mazionga bow effects':
+      - if '!<context.entity.has_flag[Hit by Mazionga]||false>' {
+        - flag <context.entity> "Hit by Mazionga" duration:20s 
+        - strike location:<context.entity.location>
+        - strike location:<context.entity.location>
+        - strike location:<context.entity.location> 
+      }
+  'Bufudyne bow effects':
+      - if '!<context.entity.has_flag[Hit by Bufudyne]||false>' {
+        - flag <context.entity> "Hit by Bufudyne" duration:10s 
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:-1
+        - cast slow duration:10 power:4 <context.entity> 
+      }
+  'Mabufula bow effects':
+      - if '!<context.entity.has_flag[Hit by Mabufula]||false>' {
+        - flag <context.entity> "Hit by Mabufula" duration:20s 
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:3
+        - cast slow duration:30 power:4 <context.entity>   
+        - wait 5
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:3
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - wait 5
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:2
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - wait 5
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:1
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - wait 5
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:0
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - wait 5
+        - playsound location:<context.entity.location> sound:blaze_hit volume:2 pitch:-1
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200
+      }
+  'Agidyne bow effects':
+      - if '!<context.entity.has_flag[Hit by Agidyne]||false>' {
+        - flag <context.entity> "Hit by Agidyne" duration:10s 
+        - explode power:2 location:<context.entity.location>
+        - playeffect location:<context.entity.location> effect:lava qty:60 
+        - playsound location:<context.damager.location> sound:ghast_fireball volume:2 pitch:1 
+      }
+  'Maragion bow effects':
+      - if '!<context.entity.has_flag[Hit by Maragion]||false>' {
+        - flag <context.entity> "Hit by Maragion" duration:20s 
+        - explode power:6 location:<context.entity.location>
+        - playeffect location:<context.entity.location> effect:lava qty:60
+        - playsound location:<context.damager.location> sound:ghast_fireball volume:5 pitch:-1
+      }
+  'Garudyne bow effects':
+      - if '!<context.entity.has_flag[Hit by Garudyne]||false>' {
+        - flag <context.entity> "Hit by Garudyne" duration:10s 
+        - rotate <context.entity> duration:5s 
+        - playsound location:<context.entity.location> sound:wither_idle volume:2 pitch:0 
+      }
+  'Magarula bow effects':
+      - if '!<context.entity.has_flag[Hit by Magarula]||false>' {
+        - flag <context.entity> "Hit by Magarula" duration:20s 
+        - rotate <context.entity> duration:15s 
+        - playsound location:<context.entity.location> sound:wither_idle volume:2 pitch:3
+        - playeffect location:<context.entity.location> effect:cloud qty:60 
+        - wait 5
+        - rotate <context.entity> duration:10s 
+        - playsound location:<context.entity.location> sound:wither_idle volume:2 pitch:2
+        - playeffect location:<context.entity.location> effect:cloud qty:60
+        - wait 5
+        - rotate <context.entity> duration:5s 
+        - playsound location:<context.entity.location> sound:wither_idle volume:2 pitch:1
+        - playeffect location:<context.entity.location> effect:cloud qty:60 
+        - wait 5
+        - playsound location:<context.entity.location> sound:wither_idle volume:2 pitch:0
+        - playeffect location:<context.entity.location> effect:cloud qty:60 
+      }
+  'Nix bow effects':
+      - if '!<context.entity.has_flag[Hit by Nix]||false>' {
+        - flag <context.entity> "Hit by Nix" duration:5s 
+        - cast poison duration:10 power:1 <context.entity>
+        - playeffect location:<context.entity.location> effect:witch_magic qty:30
+      }
+  'Concussion bow effects':
+      - if '!<context.entity.has_flag[Hit by Concussion]||false>' {
+        - flag <context.entity> "Hit by Concussion" duration:5s 
+        - cast blindness duration:10 power:1 <context.entity>
+      }    
+  'Hama bow effects':
+      - if '!<context.entity.has_flag[Hit by Hama]||false>' {
+        - flag <context.entity> "Hit by Hama" duration:300s 
+        - playeffect location:<context.entity.location> effect:enchantment_table qty:250  
+        - cast heal duration:3 power:5 <context.entity> 
+      }
+  'Mudo bow effects':
+      - if '!<context.entity.has_flag[Hit by Mudo]||false>' {
+        - flag <context.entity> "Hit by Mudo" duration:300s 
+        - cast harm duration:3 power:5 <context.entity>
+        - playeffect location:<context.entity.location> effect:large_smoke qty:30 
+      } 
+  'Snowballistic bow effects':
+      - if '!<context.entity.has_flag[Hit by Snowballistic]||false>' {
+        - flag <context.entity> "Hit by Snowballistic" duration:10s 
+        - playeffect location:<context.entity.location> effect:snow_shovel qty:200 
+        - explode power:1 location:<context.entity.location>
+        - cast slow duration:10 power:10 <context.entity>
+      }
+  # ------ Special foods -------------------
+  'Summon Yatagarasu food effects':
+      - execute as_server "effect <player.name> clear" silent
+      - cast jump duration:100000 power:1 <player>
+      - cast speed duration:100000 power:0 <player>
+      - cast night_vision duration:100000 power:0 <player>
+      - announce "[Broadcast] <&a><player.name.display.replace[~]> has called upon <&2>Yatagarasu-no-Okami"
+      - playeffect <player.location> effect:witch_magic qty:80 
+
+  'Summon Hermit food effects':
+      - execute as_server "effect <player.name> clear" silent
+      - cast regeneration duration:100000 power:1 <player>
+      - cast damage_resistance duration:100000 power:0 <player>
+      - cast invisibility duration:100000 power:0 <player>
+      - announce "[Broadcast] <&a><player.name.display.replace[~]> has called upon <&6>Hermit Amyntikos"
+      - playeffect <player.location> effect:witch_magic qty:80 
+
+  'Summon Leviathan food effects':
+      - execute as_server "effect <player.name> clear" silent
+      - cast water_breathing duration:100000 power:0 <player>
+      - cast fire_resistance duration:100000 power:0 <player>
+      - cast increase_damage duration:100000 power:0 <player>
+      - announce "[Broadcast] <&a><player.name.display.replace[~]> has called upon <&3>Magatsu Leviathan"
+      - playeffect <player.location> effect:witch_magic qty:80 
+
+  'Summon Guardian food effects':
+      - execute as_server "effect <player.name> clear" silent
+      - cast increase_damage duration:100000 power:1 <player>
+      - cast speed duration:100000 power:1 <player>
+      - announce "[Broadcast] <&a><player.name.display.replace[~]> has called upon <&1>Guardian Genesis"
+      - playeffect <player.location> effect:witch_magic qty:80 
+
+  #'Enigma Fruit food effects':
+  #    - strike no_damage location:<player.location>
+  #    - repeat 2 {
+  #      - random {
+  #        - cast harm duration:240 power:10 <player>
+  #        - cast poison duration:240 power:2 <player>
+  #        - cast blindness duration:240 power:2 <player>
+  #        - cast confusion duration:240 power:2 <player>
+  #        - cast slow duration:240 power:2 <player>
+  #        - cast wither duration:240 power:2 <player>
+  #        - cast hunger duration:240 power:2 <player>
+  #        - cast weakness duration:240 power:2 <player>
+  #        - cast heal duration:240 power:10 <player>
+  #        - cast regeneration duration:240 power:2 <player>
+  #        - cast increase_damage duration:240 power:2 <player>
+  #        - cast speed duration:240 power:2 <player>
+  #        - cast jump duration:240 power:2 <player>
+  #        - cast damage_resistance duration:240 power:2 <player>
+  #        - cast invisibility duration:240 power:2 <player>
+  #        - cast fire_resistance duration:240 power:2 <player>
+  #      }
+  #    }
+  'Vector Carrot food effects':
+      - strike no_damage location:<player.location>
+      - cast regeneration duration:5 power:4 <player>
+      - rotate <player> duration:15
+      - cast jump duration:5 power:4 <player>
+
+  'Infinite Cookie food effects':
+      - drop 'i@Infinite Cookie' <player.location>
+      
+  # ----- Un-equipping chestplates ----------------------
+  'Shackle Regalias unequip chestplate effects':
+    - if <context.reason> == break {
+      - cast increase_damage duration:120 power:2 <player>
+      - cast speed duration:120 power:2 <player>
+      - cast damage_resistance duration:120 power:2 <player>
+      - drop 'i@Scourge Regalias' <player.location>
+    }
+  'Scourge Regalias unequip chestplate effects':
+    - if <context.reason> == break {
+      - cast weakness duration:120 power:2 <player>
+      - cast slow duration:120 power:2 <player>
+      - cast damage_resistance duration:120 power:2 <player>
+      - drop 'i@Shackle Regalias' <player.location>
+    }
+  'Blizzaro unequip chestplate effects':
+      - cast fire_resistance duration:180 power:0 <player>
+      - cast slow duration:180 power:10 <player>
+      - cast weakness duration:180 power:10 <player>
+      
+  'Carapace unequip chestplate effects':
+      - cast slow remove <player>
+      - cast damage_resistance remove <player>
+
+  'OMC unequip chestplate effects':
+      - cast damage_resistance remove <player>
+      - flag player "Wearing OMC:False"
+
+  #'Shadow Tag unequip helmet effects':
+      #- cast blindness remove <player>
+      #- flag player "Shadow Tag:Null"      
